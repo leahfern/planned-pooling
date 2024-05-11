@@ -14,6 +14,7 @@ const SidePanel = (props) => {
     height: '100vh',
     boxShadow: '-5px 0px 5px 1px #eeeeee',
     padding: 10,
+    overflow: 'auto',
   };
   const buttonContainerStyles = {
     display: 'flex',
@@ -22,7 +23,7 @@ const SidePanel = (props) => {
     display: displayContent,
     flexDirection: 'column',
   };
-  const openCloseIcon = showSidePanel ? '>' : '...';
+  const openCloseIcon = showSidePanel ? 'chevron_right' : 'menu';
   const toggleSidePanel = () => {
     setShowSidePanel(!showSidePanel);
   };
@@ -31,14 +32,14 @@ const SidePanel = (props) => {
       <div style={buttonContainerStyles}>
         <button
           onClick={toggleSidePanel}
+          className="material-symbols-outlined"
           width="fit-content"
-          data-testid="toggleSidePanelButton"
         >
           {openCloseIcon}
         </button>
       </div>
-      <div style={sidePanelContentStyles} data-testid="sidePanelContent">
-        <h2 style={{ width: '100%' }}>Color sequence</h2>
+      <div style={sidePanelContentStyles}>
+        <h2 style={{ width: '100%', textAlign: 'center' }}>Color list</h2>
         <ColorList
           colorSequence={colorSequence}
           setColorSequence={setColorSequence}

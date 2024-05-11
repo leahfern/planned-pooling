@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Row from './Row'; // Assuming you have a Row component
 
-const Graph = ({ width, height, showGridlines, colorSequence }) => {
+const Graph = ({
+  width,
+  height,
+  showGridlines,
+  colorSequence,
+  stitchPattern,
+}) => {
   // State to keep track of the repeated color sequence
   const [repeatedColorSequence, setRepeatedColorSequence] = useState([]);
 
@@ -28,8 +34,8 @@ const Graph = ({ width, height, showGridlines, colorSequence }) => {
     const endIndex = (i + 1) * width;
     let rowColors = repeatedColorSequence.slice(startIndex, endIndex);
 
-    // Reverse the order of colors for even rows
-    if (i % 2 === 1) {
+    // If back and forth, reverse the order of colors for even rows
+    if (stitchPattern === 'back-and-forth' && i % 2 === 1) {
       rowColors = rowColors.reverse();
     }
 

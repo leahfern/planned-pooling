@@ -23,7 +23,7 @@ const Dimensions = (props) => {
   };
   return (
     <div style={dimensionsStyling}>
-      <h1>Planned Pooling Helper</h1>
+      <h1 style={{ textAlign: 'center' }}>Planned Pooling Helper</h1>
       <h2>Number of stitches:</h2>
       <div style={inputPanelStyling}>
         <div style={inputContainerStyling}>
@@ -34,9 +34,8 @@ const Dimensions = (props) => {
             onChange={selectWidth}
             max={1000}
             min={1}
-            id="width"
           />
-          <label htmlFor="width">Stitches per row</label>
+          <span>Stitches per row</span>
         </div>
         <div style={inputContainerStyling}>
           <input
@@ -46,9 +45,8 @@ const Dimensions = (props) => {
             onChange={selectHeight}
             max={1000}
             min={1}
-            id="height"
           />
-          <label htmlFor="height">Number of rows</label>
+          <span>Number of rows</span>
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import Dimensions from './Dimensions.jsx';
+import { STITCH_PATTERNS } from '../modules/stitchPatterns';
 
 const GraphEditor = (props) => {
   const {
@@ -8,6 +9,8 @@ const GraphEditor = (props) => {
     setGraphHeight,
     showGridlines,
     setShowGridlines,
+    stitchPattern,
+    setStitchPattern,
   } = props;
 
   const editorStyling = {
@@ -27,14 +30,27 @@ const GraphEditor = (props) => {
         setGraphHeight={setGraphHeight}
         setGraphWidth={setGraphWidth}
       />
-      <div>
-        <input
-          type="checkbox"
-          checked={showGridlines}
-          onChange={handleShowHideGridlines}
-          id="showGridlines"
-        />
-        <label htmlFor="showGridlines">Show gridlines</label>
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <div>
+          <input
+            type="checkbox"
+            checked={showGridlines}
+            onChange={handleShowHideGridlines}
+          />
+          Show gridlines
+        </div>
+        <div style={{ marginLeft: 10 }}>
+          <select
+            value={stitchPattern}
+            onChange={(e) => setStitchPattern(e.target.value)}
+          >
+            {STITCH_PATTERNS.map((pattern) => (
+              <option key={pattern} value={pattern}>
+                {pattern}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
     </div>
   );

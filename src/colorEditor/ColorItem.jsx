@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import ColorPicker from './ColorPicker';
 
 const ColorItem = (props) => {
@@ -7,7 +8,13 @@ const ColorItem = (props) => {
     textColor,
     colorSequence,
     setColorSequence,
+    onDragStart,
+    onDragOver,
+    onDragEnter,
+    onDragEnd,
   } = props;
+
+  const [showPicker, setShowPicker] = useState(false);
 
   const handleColorChange = (newColor) => {
     updateColorItem({ ...colorItem, color: newColor });
@@ -21,50 +28,86 @@ const ColorItem = (props) => {
 
   const handleDelete = (e) => {
     e.preventDefault();
-    const newSequence = colorSequence.filter(
-      (color) => color.sequence !== colorItem.sequence
+    const shouldDelete = window.confirm(
+      'Are you sure you want to delete this color?'
     );
-    const reorderedSequence = newSequence.map((color) =>
-      color.sequence > colorItem.sequence
-        ? { ...color, sequence: color.sequence - 1 }
-        : color
+    if (shouldDelete) {
+      const newSequence = colorSequence.filter(
+        (color) => color.sequence !== colorItem.sequence
+      );
+      const reorderedSequence = newSequence.map((color) =>
+        color.sequence > colorItem.sequence
+          ? { ...color, sequence: color.sequence - 1 }
+          : color
+      );
+      setColorSequence(reorderedSequence);
+    }
+  };
+
+  const rgbToHex = (rgb) => {
+    const [r, g, b] = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/).slice(1);
+    return (
+      '#' + ((1 << 24) + (+r << 16) + (+g << 8) + +b).toString(16).slice(1)
     );
-    setColorSequence(reorderedSequence);
   };
 
   return (
     <div
+      draggable={!showPicker}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDragEnter={onDragEnter}
+      onDragEnd={onDragEnd}
       style={{
         background: colorItem.color,
         color: textColor, // Set text color dynamically
         padding: 5,
         border: '1px solid gray',
         display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'start',
+        alignItems: 'center',
         position: 'relative',
+        cursor: 'grab',
+        justifyContent: 'space-between',
       }}
-      data-testid={`color-item-${colorItem.sequence}`}
     >
-      <div style={{ display: 'flex' }}>
-        <label htmlFor="colorPicker">color:</label>
-        <ColorPicker
-          color={colorItem.color}
-          onChange={handleColorChange}
-          id="colorPicker"
-        />
+      <div
+        style={{
+          display: 'flex',
+          height: '100%',
+          alignItems: 'center',
+          padding: 10,
+        }}
+      >
+        {colorItem.sequence}
       </div>
       <div>
-        <label htmlFor="stitchCount">stitches:</label>
-        <input
-          defaultValue={colorItem.count}
-          onChange={handleCountChange}
-          type="number"
-          max={100}
-          min={1}
-        />
+        <div style={{ display: 'flex' }}>
+          {rgbToHex(colorItem.color)}
+          <ColorPicker
+            color={colorItem.color}
+            onChange={handleColorChange}
+            showPicker={showPicker}
+            setShowPicker={setShowPicker}
+          />
+        </div>
+        <div style={{ marginTop: 20 }}>
+          stitches:
+          <input
+            defaultValue={colorItem.count}
+            onChange={handleCountChange}
+            type="number"
+            max={100}
+            min={1}
+          />
+        </div>
       </div>
-      <button onClick={handleDelete}>delete color</button>
+      <div
+        style={{ alignSelf: 'start', cursor: 'pointer' }}
+        onClick={handleDelete}
+        className="material-symbols-outlined"
+      >
+        close
+      </div>
     </div>
   );
 };

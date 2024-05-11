@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChromePicker } from 'react-color';
 
-const ColorPicker = ({ color, onChange }) => {
-  const [showPicker, setShowPicker] = useState(false);
+const ColorPicker = ({ color, onChange, showPicker, setShowPicker }) => {
   const [selectedColor, setSelectedColor] = useState(color);
   const pickerRef = useRef(null);
 
@@ -18,7 +17,7 @@ const ColorPicker = ({ color, onChange }) => {
     return () => {
       document.removeEventListener('click', handleOutsideClick);
     };
-  }, []);
+  }, [setShowPicker]);
 
   const handleColorChange = (newColor) => {
     // Convert the RGB color object to the format rgb(r, g, b)
@@ -38,10 +37,19 @@ const ColorPicker = ({ color, onChange }) => {
   return (
     <div style={{ position: 'relative' }} ref={pickerRef}>
       <span
-        style={{ cursor: 'pointer', textDecoration: 'underline' }}
+        style={{
+          cursor: 'pointer',
+          // textDecoration: 'underline',
+          marginLeft: 5,
+        }}
         onClick={() => setShowPicker(!showPicker)} // Toggle the visibility of the color picker
       >
-        Edit
+        <i
+          className="material-symbols-outlined"
+          style={{ cursor: 'pointer', fontSize: 14 }}
+        >
+          edit
+        </i>
       </span>
       {showPicker && (
         <div
@@ -50,6 +58,7 @@ const ColorPicker = ({ color, onChange }) => {
             zIndex: '2',
             top: 0,
             right: '50%',
+            cursor: 'crosshair',
           }}
         >
           <ChromePicker color={selectedColor} onChange={handleColorChange} />

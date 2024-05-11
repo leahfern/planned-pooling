@@ -1,4 +1,5 @@
 import ColorItem from './ColorItem.jsx';
+import { useRef } from 'react';
 
 const ColorList = (props) => {
   const { colorSequence, setColorSequence } = props;
@@ -51,21 +52,62 @@ const ColorList = (props) => {
     setColorSequence(newSequence);
   };
 
+  //--LIST SORTING FUNCTIONALITY--//
+
+  //reference for dragItem and dragOverItem
+
+  const dragItem = useRef(null);
+  const dragOverItem = useRef(null);
+
+  //handlers
+  const onDragStart = (e, index) => {
+    dragItem.current = index;
+    e.currentTarget.classList.add('dragging');
+  };
+
+  const onDragOver = (e) => {
+    e.preventDefault(); // Necessary to allow dropping
+  };
+
+  const onDragEnter = (e, index) => {
+    dragOverItem.current = index;
+  };
+
+  const onDragEnd = (e) => {
+    e.currentTarget.classList.remove('dragging');
+    const itemBeingDragged = colorSequence[dragItem.current];
+    const remainingItems = colorSequence.filter(
+      (item, index) => index !== dragItem.current
+    );
+    const reorderedItems = [
+      ...remainingItems.slice(0, dragOverItem.current),
+      itemBeingDragged,
+      ...remainingItems.slice(dragOverItem.current),
+    ];
+    setColorSequence(
+      reorderedItems.map((item, index) => ({ ...item, sequence: index + 1 }))
+    );
+  };
+
+  // ...
+
   return (
     <div>
-      {colorSequence.map((color) => {
-        return (
-          <ColorItem
-            colorItem={color}
-            textColor={calculateTextColor(color.color)}
-            updateColorItem={updateColorItem}
-            colorSequence={colorSequence}
-            setColorSequence={setColorSequence}
-            key={color.sequence}
-          />
-        );
-      })}
-      <button onClick={addColor}>add color</button>
+      {colorSequence.map((color, index) => (
+        <ColorItem
+          colorItem={color}
+          textColor={calculateTextColor(color.color)}
+          updateColorItem={updateColorItem}
+          colorSequence={colorSequence}
+          setColorSequence={setColorSequence}
+          key={color.sequence}
+          onDragStart={(e) => onDragStart(e, index)}
+          onDragOver={onDragOver}
+          onDragEnter={(e) => onDragEnter(e, index)}
+          onDragEnd={onDragEnd}
+        />
+      ))}
+      <button onClick={addColor}>Add a color</button>
     </div>
   );
 };
