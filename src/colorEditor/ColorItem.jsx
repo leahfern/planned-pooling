@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import ColorPicker from './ColorPicker';
+import React from 'react';
+import { getTextColor, rgbToHex } from '../utils/colorUtils';
+import ColorInput from './ColorInput';
 
 const ColorItem = (props) => {
   const {
     colorItem,
     updateColorItem,
-    textColor,
     colorSequence,
     setColorSequence,
     onDragStart,
@@ -13,8 +13,6 @@ const ColorItem = (props) => {
     onDragEnter,
     onDragEnd,
   } = props;
-
-  const [showPicker, setShowPicker] = useState(false);
 
   const handleColorChange = (newColor) => {
     updateColorItem({ ...colorItem, color: newColor });
@@ -43,24 +41,16 @@ const ColorItem = (props) => {
       setColorSequence(reorderedSequence);
     }
   };
-
-  const rgbToHex = (rgb) => {
-    const [r, g, b] = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/).slice(1);
-    return (
-      '#' + ((1 << 24) + (+r << 16) + (+g << 8) + +b).toString(16).slice(1)
-    );
-  };
-
   return (
     <div
-      draggable={!showPicker}
+      // draggable={!showPicker}
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDragEnter={onDragEnter}
       onDragEnd={onDragEnd}
       style={{
         background: colorItem.color,
-        color: textColor, // Set text color dynamically
+        color: getTextColor(colorItem.color), // Set text color dynamically
         padding: 5,
         border: '1px solid gray',
         display: 'flex',
@@ -80,27 +70,12 @@ const ColorItem = (props) => {
       >
         {colorItem.sequence}
       </div>
-      <div>
-        <div style={{ display: 'flex' }}>
-          {rgbToHex(colorItem.color)}
-          <ColorPicker
-            color={colorItem.color}
-            onChange={handleColorChange}
-            showPicker={showPicker}
-            setShowPicker={setShowPicker}
-          />
-        </div>
-        <div style={{ marginTop: 20 }}>
-          stitches:
-          <input
-            defaultValue={colorItem.count}
-            onChange={handleCountChange}
-            type="number"
-            max={100}
-            min={1}
-          />
-        </div>
-      </div>
+      <ColorInput
+        color={rgbToHex(colorItem.color)}
+        count={colorItem.count}
+        onColorChange={handleColorChange}
+        onCountChange={handleCountChange}
+      />
       <div
         style={{ alignSelf: 'start', cursor: 'pointer' }}
         onClick={handleDelete}

@@ -1,4 +1,5 @@
 import ColorList from './ColorList.jsx';
+import AddColor from './AddColor.jsx';
 
 const SidePanel = (props) => {
   const { colorSequence, setColorSequence, showSidePanel, setShowSidePanel } =
@@ -11,10 +12,9 @@ const SidePanel = (props) => {
     display: 'flex',
     flexDirection: 'column',
     marginLeft: 20,
-    height: '100vh',
+    minHeight: '100vh',
     boxShadow: '-5px 0px 5px 1px #eeeeee',
     padding: 10,
-    overflow: 'auto',
   };
   const buttonContainerStyles = {
     display: 'flex',
@@ -45,6 +45,10 @@ const SidePanel = (props) => {
           setColorSequence={setColorSequence}
         />
       </div>
+      <AddColor
+        colorSequence={colorSequence}
+        setColorSequence={setColorSequence}
+      />
     </div>
   );
 };

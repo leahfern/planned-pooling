@@ -46,7 +46,7 @@ const GraphEditor = (props) => {
           >
             {STITCH_PATTERNS.map((pattern) => (
               <option key={pattern} value={pattern}>
-                {pattern}
+                {`${pattern} stitching`}
               </option>
             ))}
           </select>

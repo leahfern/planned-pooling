@@ -1,83 +1,54 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { ChromePicker } from 'react-color';
+import useOutsideClick from '../hooks/useOutsideClick';
+import '../App.css';
+import { hexToRgb } from '../utils/colorUtils';
 
-const ColorPicker = ({ color, onChange, showPicker, setShowPicker }) => {
-  const [selectedColor, setSelectedColor] = useState(color);
+const ColorPicker = ({ color, onChange }) => {
+  const [showPicker, setShowPicker] = useState(false);
+  const [initialColor, setInitialColor] = useState(color);
   const pickerRef = useRef(null);
 
-  useEffect(() => {
-    const handleOutsideClick = (event) => {
-      if (pickerRef.current && !pickerRef.current.contains(event.target)) {
-        setShowPicker(false);
-      }
-    };
-
-    document.addEventListener('click', handleOutsideClick);
-
-    return () => {
-      document.removeEventListener('click', handleOutsideClick);
-    };
-  }, [setShowPicker]);
+  useOutsideClick(pickerRef, () => {
+    setShowPicker(false);
+  });
 
   const handleColorChange = (newColor) => {
-    // Convert the RGB color object to the format rgb(r, g, b)
     const rgbColorString = `rgb(${newColor.rgb.r}, ${newColor.rgb.g}, ${newColor.rgb.b})`;
-
-    // Set the selected color using the RGB color string
-    setSelectedColor(rgbColorString);
-
-    // Pass the RGB color string to the onChange function
     onChange(rgbColorString);
   };
 
-  const handleClosePicker = () => {
+  const handleOpen = () => {
+    setInitialColor(color);
+    setShowPicker(true);
+  };
+
+  const handleSave = () => {
     setShowPicker(false);
   };
 
+  const handleCancel = () => {
+    setShowPicker(false);
+    const initialColorRGB = hexToRgb(initialColor);
+    onChange(initialColorRGB);
+  };
+
   return (
-    <div style={{ position: 'relative' }} ref={pickerRef}>
-      <span
-        style={{
-          cursor: 'pointer',
-          // textDecoration: 'underline',
-          marginLeft: 5,
-        }}
-        onClick={() => setShowPicker(!showPicker)} // Toggle the visibility of the color picker
-      >
-        <i
-          className="material-symbols-outlined"
-          style={{ cursor: 'pointer', fontSize: 14 }}
-        >
-          edit
-        </i>
+    <div className="color-picker" ref={pickerRef}>
+      <span className="color-picker-edit" onClick={handleOpen}>
+        <i className="material-symbols-outlined">edit</i>
       </span>
       {showPicker && (
-        <div
-          style={{
-            position: 'absolute',
-            zIndex: '2',
-            top: 0,
-            right: '50%',
-            cursor: 'crosshair',
-          }}
-        >
-          <ChromePicker color={selectedColor} onChange={handleColorChange} />
-          <button
-            style={{
-              position: 'absolute',
-              top: '-10px',
-              right: '-10px',
-              cursor: 'pointer',
-              background: 'white',
-              border: 'none',
-              outline: '1px solid rgba(0,0,0,0.2)',
-              borderRadius: 50,
-              boxShadow: '4px 4px 5px rgba(0,0,0,0.2',
-            }}
-            onClick={handleClosePicker}
-          >
-            X
-          </button>
+        <div className="color-picker-popup">
+          <ChromePicker color={color} onChange={handleColorChange} />
+          <div className="color-picker-buttons">
+            <button className="color-picker-save" onClick={handleSave}>
+              Save
+            </button>
+            <button className="color-picker-cancel" onClick={handleCancel}>
+              Cancel
+            </button>
+          </div>
         </div>
       )}
     </div>
