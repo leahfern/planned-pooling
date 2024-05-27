@@ -45,10 +45,12 @@ const SidePanel = (props) => {
           setColorSequence={setColorSequence}
         />
       </div>
-      <AddColor
-        colorSequence={colorSequence}
-        setColorSequence={setColorSequence}
-      />
+      {showSidePanel && (
+        <AddColor
+          colorSequence={colorSequence}
+          setColorSequence={setColorSequence}
+        />
+      )}
     </div>
   );
 };
