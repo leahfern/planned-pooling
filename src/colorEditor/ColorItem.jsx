@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { getTextColor, rgbToHex } from '../utils/colorUtils';
 import ColorInput from './ColorInput';
 
@@ -13,6 +13,8 @@ const ColorItem = (props) => {
     onDragEnter,
     onDragEnd,
   } = props;
+
+  const [showPicker, setShowPicker] = useState(false);
 
   const handleColorChange = (newColor) => {
     updateColorItem({ ...colorItem, color: newColor });
@@ -43,7 +45,7 @@ const ColorItem = (props) => {
   };
   return (
     <div
-      // draggable={!showPicker}
+      draggable={!showPicker}
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDragEnter={onDragEnter}
@@ -75,6 +77,8 @@ const ColorItem = (props) => {
         count={colorItem.count}
         onColorChange={handleColorChange}
         onCountChange={handleCountChange}
+        showPicker={showPicker}
+        setShowPicker={setShowPicker}
       />
       <div
         style={{ alignSelf: 'start', cursor: 'pointer' }}

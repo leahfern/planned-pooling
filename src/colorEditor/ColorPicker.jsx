@@ -4,8 +4,7 @@ import useOutsideClick from '../hooks/useOutsideClick';
 import '../App.css';
 import { hexToRgb } from '../utils/colorUtils';
 
-const ColorPicker = ({ color, onChange }) => {
-  const [showPicker, setShowPicker] = useState(false);
+const ColorPicker = ({ color, onChange, showPicker, setShowPicker }) => {
   const [initialColor, setInitialColor] = useState(color);
   const pickerRef = useRef(null);
 
