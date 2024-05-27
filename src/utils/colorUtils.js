@@ -15,7 +15,6 @@ export function getTextColor(backgroundColor) {
 }
 
 export function rgbToHex(rgb) {
-  console.log('leah, rgb', rgb);
   const [r, g, b] = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/).slice(1);
   return '#' + ((1 << 24) + (+r << 16) + (+g << 8) + +b).toString(16).slice(1);
 }
