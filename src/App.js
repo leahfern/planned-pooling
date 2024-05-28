@@ -20,8 +20,8 @@ const appStyling = {
 };
 
 const defaultParams = {
-  graphWidth: 20,
-  graphHeight: 20,
+  graphWidth: 41,
+  graphHeight: 41,
   showGridlines: true,
   stitchPattern: BACK_AND_FORTH,
   colorSequence: [
