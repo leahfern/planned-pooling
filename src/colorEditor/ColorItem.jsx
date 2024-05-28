@@ -1,18 +1,11 @@
 import React, { useState } from 'react';
 import ColorInput from './ColorInput';
 import getColorDetails from '../api/colorDetails.js';
+import { useDragHandlers } from '../hooks/useDragHandlers';
+import { useDeleteHandler } from '../hooks/useDeleteHandler';
 
 const ColorItem = (props) => {
-  const {
-    colorItem,
-    updateColorItem,
-    colorSequence,
-    setColorSequence,
-    onDragStart,
-    onDragOver,
-    onDragEnter,
-    onDragEnd,
-  } = props;
+  const { colorItem, updateColorItem, colorSequence, setColorSequence } = props;
 
   const [showPicker, setShowPicker] = useState(false);
 
@@ -32,30 +25,20 @@ const ColorItem = (props) => {
     updateColorItem({ ...colorItem, count: newCount });
   };
 
-  const handleDelete = (e) => {
-    e.preventDefault();
-    const shouldDelete = window.confirm(
-      'Are you sure you want to delete this color?'
-    );
-    if (shouldDelete) {
-      const newSequence = colorSequence.filter(
-        (color) => color.sequence !== colorItem.sequence
-      );
-      const reorderedSequence = newSequence.map((color) =>
-        color.sequence > colorItem.sequence
-          ? { ...color, sequence: color.sequence - 1 }
-          : color
-      );
-      setColorSequence(reorderedSequence);
-    }
-  };
+  const handleDelete = useDeleteHandler({
+    colorItem,
+    colorSequence,
+    setColorSequence,
+  });
+  const dragHandlers = useDragHandlers(props);
+
   return (
     <div
       draggable={!showPicker}
-      onDragStart={onDragStart}
-      onDragOver={onDragOver}
-      onDragEnter={onDragEnter}
-      onDragEnd={onDragEnd}
+      onDragStart={dragHandlers.handleDragStart}
+      onDragOver={dragHandlers.handleDragOver}
+      onDragEnter={dragHandlers.handleDragEnter}
+      onDragEnd={dragHandlers.handleDragEnd}
       style={{
         background: colorItem.hex,
         color: colorItem.textColor,
