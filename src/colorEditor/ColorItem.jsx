@@ -16,9 +16,14 @@ const ColorItem = (props) => {
 
   const [showPicker, setShowPicker] = useState(false);
 
-  const handleColorChange = async (newColor) => {
+  const updateColorWithDetails = async (newColor) => {
     const colorDetails = await getColorDetails(newColor);
+    setShowPicker(false);
     updateColorItem({ ...colorItem, ...colorDetails });
+  };
+
+  const handleColorChange = (newColor) => {
+    updateColorItem({ ...colorItem, hex: newColor });
   };
 
   const handleCountChange = (e) => {
@@ -77,6 +82,7 @@ const ColorItem = (props) => {
         colorItem={colorItem}
         onColorChange={handleColorChange}
         onCountChange={handleCountChange}
+        updateColorWithDetails={updateColorWithDetails}
         showPicker={showPicker}
         setShowPicker={setShowPicker}
       />

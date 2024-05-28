@@ -7,6 +7,7 @@ const ColorInput = ({
   onCountChange,
   showPicker,
   setShowPicker,
+  updateColorWithDetails,
 }) => {
   return (
     <div>
@@ -15,6 +16,7 @@ const ColorInput = ({
         <ColorPicker
           color={colorItem.hex}
           onChange={onColorChange}
+          updateColorWithDetails={updateColorWithDetails}
           showPicker={showPicker}
           setShowPicker={setShowPicker}
         />

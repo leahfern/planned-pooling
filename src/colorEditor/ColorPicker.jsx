@@ -1,15 +1,16 @@
 import React, { useState, useRef } from 'react';
 import { ChromePicker } from 'react-color';
-import useOutsideClick from '../hooks/useOutsideClick';
 import '../App.css';
 
-const ColorPicker = ({ color, onChange, showPicker, setShowPicker }) => {
+const ColorPicker = ({
+  color,
+  onChange,
+  showPicker,
+  setShowPicker,
+  updateColorWithDetails,
+}) => {
   const [initialColor, setInitialColor] = useState(color);
   const pickerRef = useRef(null);
-
-  useOutsideClick(pickerRef, () => {
-    setShowPicker(false);
-  });
 
   const handleColorChange = (newColor) => {
     onChange(newColor.hex);
@@ -22,6 +23,7 @@ const ColorPicker = ({ color, onChange, showPicker, setShowPicker }) => {
 
   const handleSave = () => {
     setShowPicker(false);
+    updateColorWithDetails(color);
   };
 
   const handleCancel = () => {
