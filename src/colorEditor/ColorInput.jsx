@@ -24,7 +24,7 @@ const ColorInput = ({
       <div style={{ marginTop: 20 }}>
         stitches:
         <input
-          defaultValue={colorItem.count}
+          value={colorItem.count}
           onChange={onCountChange}
           type="number"
           max={100}
