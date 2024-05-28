@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { getTextColor, rgbToHex } from '../utils/colorUtils';
 import ColorInput from './ColorInput';
+import getColorDetails from '../api/colorDetails.js';
 
 const ColorItem = (props) => {
   const {
@@ -16,8 +16,9 @@ const ColorItem = (props) => {
 
   const [showPicker, setShowPicker] = useState(false);
 
-  const handleColorChange = (newColor) => {
-    updateColorItem({ ...colorItem, color: newColor });
+  const handleColorChange = async (newColor) => {
+    const colorDetails = await getColorDetails(newColor);
+    updateColorItem({ ...colorItem, ...colorDetails });
   };
 
   const handleCountChange = (e) => {
@@ -51,8 +52,8 @@ const ColorItem = (props) => {
       onDragEnter={onDragEnter}
       onDragEnd={onDragEnd}
       style={{
-        background: colorItem.color,
-        color: getTextColor(colorItem.color), // Set text color dynamically
+        background: colorItem.hex,
+        color: colorItem.textColor,
         padding: 5,
         border: '1px solid gray',
         display: 'flex',
@@ -73,8 +74,7 @@ const ColorItem = (props) => {
         {colorItem.sequence}
       </div>
       <ColorInput
-        color={rgbToHex(colorItem.color)}
-        count={colorItem.count}
+        colorItem={colorItem}
         onColorChange={handleColorChange}
         onCountChange={handleCountChange}
         showPicker={showPicker}

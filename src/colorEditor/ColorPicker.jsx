@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import { ChromePicker } from 'react-color';
 import useOutsideClick from '../hooks/useOutsideClick';
 import '../App.css';
-import { hexToRgb } from '../utils/colorUtils';
 
 const ColorPicker = ({ color, onChange, showPicker, setShowPicker }) => {
   const [initialColor, setInitialColor] = useState(color);
@@ -13,8 +12,7 @@ const ColorPicker = ({ color, onChange, showPicker, setShowPicker }) => {
   });
 
   const handleColorChange = (newColor) => {
-    const rgbColorString = `rgb(${newColor.rgb.r}, ${newColor.rgb.g}, ${newColor.rgb.b})`;
-    onChange(rgbColorString);
+    onChange(newColor.hex);
   };
 
   const handleOpen = () => {
@@ -28,8 +26,7 @@ const ColorPicker = ({ color, onChange, showPicker, setShowPicker }) => {
 
   const handleCancel = () => {
     setShowPicker(false);
-    const initialColorRGB = hexToRgb(initialColor);
-    onChange(initialColorRGB);
+    onChange(initialColor);
   };
 
   return (

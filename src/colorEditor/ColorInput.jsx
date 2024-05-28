@@ -2,8 +2,7 @@ import React from 'react';
 import ColorPicker from './ColorPicker';
 
 const ColorInput = ({
-  color,
-  count,
+  colorItem,
   onColorChange,
   onCountChange,
   showPicker,
@@ -12,9 +11,9 @@ const ColorInput = ({
   return (
     <div>
       <div style={{ display: 'flex' }}>
-        {color}
+        {colorItem.name ?? colorItem.hex}
         <ColorPicker
-          color={color}
+          color={colorItem.hex}
           onChange={onColorChange}
           showPicker={showPicker}
           setShowPicker={setShowPicker}
@@ -23,7 +22,7 @@ const ColorInput = ({
       <div style={{ marginTop: 20 }}>
         stitches:
         <input
-          defaultValue={count}
+          defaultValue={colorItem.count}
           onChange={onCountChange}
           type="number"
           max={100}

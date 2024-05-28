@@ -1,18 +1,22 @@
 import React from 'react';
-import { getRandomRGBColor } from '../utils/colorUtils.js';
+import { getRandomColor } from '../utils/colorUtils.js';
+import getColorDetails from '../api/colorDetails.js';
 
 const AddColor = ({ colorSequence, setColorSequence }) => {
-  const numStitches = Math.floor(Math.random() * 5) + 1;
-
-  const newColorItem = {
-    sequence: colorSequence.length + 1,
-    color: getRandomRGBColor(),
-    count: numStitches,
+  const generateNewColor = async () => {
+    const numStitches = Math.floor(Math.random() * 5) + 1;
+    const randomColor = getRandomColor();
+    const colorDetails = await getColorDetails(randomColor);
+    return {
+      sequence: colorSequence.length + 1,
+      count: numStitches,
+      ...colorDetails,
+    };
   };
 
-  const addColor = (e) => {
+  const addColor = async (e) => {
     e.preventDefault();
-    setColorSequence([...colorSequence, newColorItem]);
+    setColorSequence([...colorSequence, await generateNewColor()]);
   };
 
   return (

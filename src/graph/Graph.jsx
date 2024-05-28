@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Row from './Row'; // Assuming you have a Row component
+import Row from './Row';
 
 const Graph = ({
   width,
@@ -18,7 +18,7 @@ const Graph = ({
       for (const colorInfo of colorSequence) {
         newRepeatedColorSequence = [
           ...newRepeatedColorSequence,
-          ...Array(colorInfo.count).fill(colorInfo.color),
+          ...Array(colorInfo.count).fill(colorInfo.hex),
         ];
       }
     }

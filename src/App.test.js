@@ -49,17 +49,4 @@ describe('App', () => {
       : false;
     expect(updatedStatus).not.toBe(initialStatus);
   });
-
-  // test('updates color sequence', () => {
-  //   render(<App />);
-  //   const colorItem1Container = screen.getByTestId('color-item-1');
-  //   // const colorInput = screen.getByLabelText('color:');
-  //   const countInput = colorItem1Container.getByTestId('stitchCount'); // Assuming only one color input
-
-  //   // const countInput = colorItem1Container.getByLabelText('stitches:');
-  //   // fireEvent.change(colorInput, { target: { value: 'rgb(255,255,255)' } });
-  //   fireEvent.change(countInput, { target: { value: '10' } });
-  //   // expect(colorInput).toHaveValue('rgb(255,255,255)');
-  //   expect(countInput).toHaveValue('10');
-  // });
 });

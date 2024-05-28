@@ -25,9 +25,34 @@ const defaultParams = {
   showGridlines: true,
   stitchPattern: BACK_AND_FORTH,
   colorSequence: [
-    { sequence: 1, color: 'rgb(120,120,120)', count: 3 },
-    { sequence: 2, color: 'rgb(255,120,120)', count: 2 },
-    { sequence: 3, color: 'rgb(0,120,255)', count: 5 },
+    {
+      sequence: 1,
+      hex: '#ff0505',
+      count: 3,
+      textColor: 'black',
+      name: 'Stoplight',
+    },
+    {
+      sequence: 2,
+      hex: '#000000',
+      count: 7,
+      textColor: 'white',
+      name: 'Black',
+    },
+    {
+      sequence: 3,
+      hex: '#2a1dde',
+      count: 3,
+      textColor: 'white',
+      name: 'Blue Angel',
+    },
+    {
+      sequence: 4,
+      hex: '#ffffff',
+      count: 1,
+      textColor: 'black',
+      name: 'White',
+    },
   ],
   showSidePanel: true,
 };
