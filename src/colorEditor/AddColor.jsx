@@ -1,6 +1,27 @@
 import React from 'react';
+import styled from 'styled-components';
 import { getRandomColor } from '../utils/colorUtils.js';
 import getColorDetails from '../api/colorDetails.js';
+
+const AddColorContainer = styled.div`
+  margin-top: ${(props) => props.theme.spacing.large};
+  display: flex;
+  justify-content: center;
+`;
+
+const AddColorButton = styled.button`
+  background-color: ${(props) => props.theme.colors.primary};
+  color: ${(props) => props.theme.colors.white};
+  border: none;
+  padding: ${(props) => props.theme.spacing.medium};
+  font-size: ${(props) => props.theme.fontSizes.medium};
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: ${(props) => props.theme.colors.accent};
+  }
+`;
 
 const AddColor = ({ colorSequence, setColorSequence }) => {
   const generateNewColor = async () => {
@@ -20,9 +41,9 @@ const AddColor = ({ colorSequence, setColorSequence }) => {
   };
 
   return (
-    <div style={{ marginTop: 20 }}>
-      <button onClick={addColor}>Add a color</button>
-    </div>
+    <AddColorContainer>
+      <AddColorButton onClick={addColor}>Add a color</AddColorButton>
+    </AddColorContainer>
   );
 };
 

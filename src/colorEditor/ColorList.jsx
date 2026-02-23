@@ -1,5 +1,5 @@
 import ColorItem from './ColorItem.jsx';
-import { useRef } from 'react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 const ColorList = (props) => {
   const { colorSequence, setColorSequence } = props;
@@ -12,59 +12,52 @@ const ColorList = (props) => {
     setColorSequence(newSequence);
   };
 
-  //--LIST SORTING FUNCTIONALITY--//
+  const onDragEnd = (result) => {
+    if (!result.destination) {
+      return;
+    }
 
-  //reference for dragItem and dragOverItem
+    const reorderedItems = Array.from(colorSequence);
+    const [reorderedItem] = reorderedItems.splice(result.source.index, 1);
+    reorderedItems.splice(result.destination.index, 0, reorderedItem);
 
-  const dragItem = useRef(null);
-  const dragOverItem = useRef(null);
-
-  //handlers
-  const onDragStart = (e, index) => {
-    dragItem.current = index;
-    e.currentTarget.classList.add('dragging');
-  };
-
-  const onDragOver = (e) => {
-    e.preventDefault(); // Necessary to allow dropping
-  };
-
-  const onDragEnter = (e, index) => {
-    dragOverItem.current = index;
-  };
-
-  const onDragEnd = (e) => {
-    e.currentTarget.classList.remove('dragging');
-    const itemBeingDragged = colorSequence[dragItem.current];
-    const remainingItems = colorSequence.filter(
-      (item, index) => index !== dragItem.current
-    );
-    const reorderedItems = [
-      ...remainingItems.slice(0, dragOverItem.current),
-      itemBeingDragged,
-      ...remainingItems.slice(dragOverItem.current),
-    ];
     setColorSequence(
       reorderedItems.map((item, index) => ({ ...item, sequence: index + 1 }))
     );
   };
 
   return (
-    <div>
-      {colorSequence.map((colorItem, index) => (
-        <ColorItem
-          colorItem={colorItem}
-          updateColorItem={updateColorItem}
-          colorSequence={colorSequence}
-          setColorSequence={setColorSequence}
-          key={colorItem.sequence}
-          onDragStart={(e) => onDragStart(e, index)}
-          onDragOver={onDragOver}
-          onDragEnter={(e) => onDragEnter(e, index)}
-          onDragEnd={onDragEnd}
-        />
-      ))}
-    </div>
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Droppable droppableId="colorList">
+        {(provided) => (
+          <div {...provided.droppableProps} ref={provided.innerRef}>
+            {colorSequence.map((colorItem, index) => (
+              <Draggable
+                key={colorItem.sequence}
+                draggableId={String(colorItem.sequence)}
+                index={index}
+              >
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                  >
+                    <ColorItem
+                      colorItem={colorItem}
+                      updateColorItem={updateColorItem}
+                      colorSequence={colorSequence}
+                      setColorSequence={setColorSequence}
+                    />
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
   );
 };
 

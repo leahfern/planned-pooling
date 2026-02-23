@@ -1,20 +1,28 @@
 import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
 import Row from './Row';
 
+const GraphContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+`;
+
 const Graph = ({
-  width,
+  length,
   height,
   showGridlines,
   colorSequence,
   stitchPattern,
+  zoom = 1,
 }) => {
   // State to keep track of the repeated color sequence
   const [repeatedColorSequence, setRepeatedColorSequence] = useState([]);
 
-  // Recalculate the repeated color sequence whenever the colorSequence, width, or height props change
+  // Recalculate the repeated color sequence whenever the colorSequence, length, or height props change
   useEffect(() => {
     let newRepeatedColorSequence = [];
-    while (newRepeatedColorSequence.length < width * height) {
+    while (newRepeatedColorSequence.length < length * height) {
       for (const colorInfo of colorSequence) {
         newRepeatedColorSequence = [
           ...newRepeatedColorSequence,
@@ -23,15 +31,15 @@ const Graph = ({
       }
     }
     setRepeatedColorSequence(newRepeatedColorSequence);
-  }, [colorSequence, width, height]);
+  }, [colorSequence, length, height]);
 
   // Generate rows
   const rows = [];
 
   // Fill rows with colors from the repeated color sequence
   for (let i = 0; i < height; i++) {
-    const startIndex = i * width;
-    const endIndex = (i + 1) * width;
+    const startIndex = i * length;
+    const endIndex = (i + 1) * length;
     let rowColors = repeatedColorSequence.slice(startIndex, endIndex);
 
     // If back and forth, reverse the order of colors for even rows
@@ -42,26 +50,17 @@ const Graph = ({
     rows.push(
       <Row
         key={i}
-        width={width}
+        length={length}
         colors={rowColors}
         showGridlines={showGridlines}
         showTopBorder={i === 0}
+        zoom={zoom}
       />
     );
   }
 
   // Render the rows
-  return (
-    <div
-      style={{
-        display: 'flex',
-        width: 500,
-        flexDirection: 'column',
-      }}
-    >
-      {rows}
-    </div>
-  );
+  return <GraphContainer>{rows}</GraphContainer>;
 };
 
 export default Graph;

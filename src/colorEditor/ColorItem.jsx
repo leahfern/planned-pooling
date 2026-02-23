@@ -1,8 +1,37 @@
 import React, { useState } from 'react';
+import styled from 'styled-components';
 import ColorInput from './ColorInput';
 import getColorDetails from '../api/colorDetails.js';
-import { useDragHandlers } from '../hooks/useDragHandlers';
-import { useDeleteHandler } from '../hooks/useDeleteHandler';
+
+const ItemContainer = styled.div`
+  background: ${(props) => props.background};
+  color: ${(props) => props.color};
+  padding: ${(props) => props.theme.spacing.small};
+  border: 1px solid ${(props) => props.theme.colors.grey};
+  display: flex;
+  align-items: center;
+  position: relative;
+  cursor: grab;
+  justify-content: space-between;
+`;
+
+const Sequence = styled.div`
+  display: flex;
+  height: 100%;
+  align-items: center;
+  padding: ${(props) => props.theme.spacing.medium};
+`;
+
+const DeleteButton = styled.div`
+  align-self: start;
+  cursor: pointer;
+  font-family: 'Material Symbols Outlined';
+  font-size: ${(props) => props.theme.fontSizes.medium};
+  color: inherit;
+  &:hover {
+    filter: brightness(1.1);
+  }
+`;
 
 const ColorItem = (props) => {
   const { colorItem, updateColorItem, colorSequence, setColorSequence } = props;
@@ -25,42 +54,17 @@ const ColorItem = (props) => {
     updateColorItem({ ...colorItem, count: newCount });
   };
 
-  const handleDelete = useDeleteHandler({
-    colorItem,
-    colorSequence,
-    setColorSequence,
-  });
-  const dragHandlers = useDragHandlers(props);
+  const handleDelete = () => {
+    if (!window.confirm('Are you sure you want to remove this color?')) return;
+    const newSequence = colorSequence
+      .filter((color) => color.sequence !== colorItem.sequence)
+      .map((item, index) => ({ ...item, sequence: index + 1 }));
+    setColorSequence(newSequence);
+  };
 
   return (
-    <div
-      draggable={!showPicker}
-      onDragStart={dragHandlers.handleDragStart}
-      onDragOver={dragHandlers.handleDragOver}
-      onDragEnter={dragHandlers.handleDragEnter}
-      onDragEnd={dragHandlers.handleDragEnd}
-      style={{
-        background: colorItem.hex,
-        color: colorItem.textColor,
-        padding: 5,
-        border: '1px solid gray',
-        display: 'flex',
-        alignItems: 'center',
-        position: 'relative',
-        cursor: 'grab',
-        justifyContent: 'space-between',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          height: '100%',
-          alignItems: 'center',
-          padding: 10,
-        }}
-      >
-        {colorItem.sequence}
-      </div>
+    <ItemContainer background={colorItem.hex} color={colorItem.textColor}>
+      <Sequence>{colorItem.sequence}</Sequence>
       <ColorInput
         colorItem={colorItem}
         onColorChange={handleColorChange}
@@ -69,14 +73,10 @@ const ColorItem = (props) => {
         showPicker={showPicker}
         setShowPicker={setShowPicker}
       />
-      <div
-        style={{ alignSelf: 'start', cursor: 'pointer' }}
-        onClick={handleDelete}
-        className="material-symbols-outlined"
-      >
-        close
-      </div>
-    </div>
+      <DeleteButton onClick={handleDelete} aria-label="Remove color">
+        delete
+      </DeleteButton>
+    </ItemContainer>
   );
 };
 

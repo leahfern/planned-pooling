@@ -1,45 +1,94 @@
+import styled from 'styled-components';
 import Dimensions from './Dimensions.jsx';
 import { STITCH_PATTERNS } from '../modules/stitchPatterns';
 
+const EditorContainer = styled.div`
+  width: 100%;
+  margin-bottom: ${(props) => props.theme.spacing.medium};
+`;
+
+const ControlsContainer = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: ${(props) => props.theme.spacing.large};
+  flex-wrap: wrap;
+`;
+
+const ControlItem = styled.div`
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+`;
+
+const CheckboxLabel = styled.label`
+  display: flex;
+  align-items: center;
+  gap: ${(props) => props.theme.spacing.small};
+  font-size: ${(props) => props.theme.fontSizes.small};
+  color: inherit;
+  cursor: pointer;
+`;
+
+const ZoomLabel = styled.label`
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: ${(props) => props.theme.fontSizes.small};
+  color: inherit;
+  margin-bottom: ${(props) => props.theme.spacing.small};
+`;
+
+const ZOOM_MIN = 0.25;
+const ZOOM_MAX = 2;
+
 const GraphEditor = (props) => {
   const {
-    width,
+    length,
     height,
-    setGraphWidth,
+    setgraphLength,
     setGraphHeight,
     showGridlines,
     setShowGridlines,
     stitchPattern,
     setStitchPattern,
+    zoom = 1,
+    setParams,
+    params,
+    maxDimension = 500,
   } = props;
-
-  const editorStyling = {
-    width: '100%',
-    marginBottom: 10,
-  };
 
   const handleShowHideGridlines = (e) => {
     setShowGridlines(!showGridlines);
   };
 
+  const handleZoomChange = (e) => {
+    const next = parseFloat(e.target.value, 10);
+    setParams({ ...params, zoom: next });
+  };
+
   return (
-    <div style={editorStyling}>
+    <EditorContainer>
       <Dimensions
-        width={width}
+        width={length}
         height={height}
         setGraphHeight={setGraphHeight}
-        setGraphWidth={setGraphWidth}
+        setgraphLength={setgraphLength}
+        maxDimension={maxDimension}
       />
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-        <div>
-          <input
-            type="checkbox"
-            checked={showGridlines}
-            onChange={handleShowHideGridlines}
-          />
-          Show gridlines
-        </div>
-        <div style={{ marginLeft: 10 }}>
+      <ControlsContainer>
+        <ControlItem>
+          <CheckboxLabel>
+            <input
+              type="checkbox"
+              checked={showGridlines}
+              onChange={handleShowHideGridlines}
+            />
+            Show gridlines
+          </CheckboxLabel>
+        </ControlItem>
+        <ControlItem>
           <select
             value={stitchPattern}
             onChange={(e) => setStitchPattern(e.target.value)}
@@ -50,9 +99,23 @@ const GraphEditor = (props) => {
               </option>
             ))}
           </select>
-        </div>
-      </div>
-    </div>
+        </ControlItem>
+        <ControlItem style={{ flexDirection: 'column', alignItems: 'center', minWidth: 120 }}>
+          <ZoomLabel htmlFor="zoom-slider">Zoom:</ZoomLabel>
+          <input
+            id="zoom-slider"
+            type="range"
+            min={ZOOM_MIN}
+            max={ZOOM_MAX}
+            step={0.05}
+            value={zoom ?? 1}
+            onChange={handleZoomChange}
+            aria-label="Zoom"
+            style={{ '--range-progress': `${(((zoom ?? 1) - ZOOM_MIN) / (ZOOM_MAX - ZOOM_MIN)) * 100}%` }}
+          />
+        </ControlItem>
+      </ControlsContainer>
+    </EditorContainer>
   );
 };
 
