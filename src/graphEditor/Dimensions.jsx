@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 const DimensionsContainer = styled.div`
@@ -76,11 +77,23 @@ const StepButton = styled.span`
 const Dimensions = (props) => {
   const { width, height, setgraphLength, setGraphHeight, maxDimension = 500 } = props;
 
-  const selectWidth = (e) => {
-    setgraphLength(e.target.value);
+  const [widthInput, setWidthInput] = useState(String(width));
+  const [heightInput, setHeightInput] = useState(String(height));
+
+  useEffect(() => {
+    setWidthInput(String(width));
+  }, [width]);
+  useEffect(() => {
+    setHeightInput(String(height));
+  }, [height]);
+
+  const commitWidth = () => {
+    const n = parseInt(widthInput, 10);
+    setgraphLength(Number.isNaN(n) ? width : n);
   };
-  const selectHeight = (e) => {
-    setGraphHeight(e.target.value);
+  const commitHeight = () => {
+    const n = parseInt(heightInput, 10);
+    setGraphHeight(Number.isNaN(n) ? height : n);
   };
 
   const increment = (setter, value) => {
@@ -103,8 +116,10 @@ const Dimensions = (props) => {
           <InputWrapper>
             <Input
               type="number"
-              value={width}
-              onChange={selectWidth}
+              value={widthInput}
+              onChange={(e) => setWidthInput(e.target.value)}
+              onBlur={commitWidth}
+              onKeyDown={(e) => e.key === 'Enter' && commitWidth()}
               max={maxDimension}
               min={1}
             />
@@ -123,8 +138,10 @@ const Dimensions = (props) => {
           <InputWrapper>
             <Input
               type="number"
-              value={height}
-              onChange={selectHeight}
+              value={heightInput}
+              onChange={(e) => setHeightInput(e.target.value)}
+              onBlur={commitHeight}
+              onKeyDown={(e) => e.key === 'Enter' && commitHeight()}
               max={maxDimension}
               min={1}
             />
