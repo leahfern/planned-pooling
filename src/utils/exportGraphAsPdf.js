@@ -46,13 +46,30 @@ export async function exportGraphAsPdf(options) {
 
   try {
     const gridEl = graphNode.firstElementChild || graphNode;
-    const canvas = await html2canvas(gridEl, {
-      useCORS: true,
-      scale: 2,
-      backgroundColor: null,
-      logging: false,
-    });
-    const imgData = canvas.toDataURL('image/png');
+    const drawableCanvas =
+      gridEl.tagName === 'CANVAS' ? gridEl : gridEl.querySelector?.('canvas');
+
+    let imgData;
+    let widthPx;
+    let heightPx;
+
+    if (drawableCanvas) {
+      imgData = drawableCanvas.toDataURL('image/png');
+      widthPx = drawableCanvas.width;
+      heightPx = drawableCanvas.height;
+    } else {
+      const captured = await html2canvas(gridEl, {
+        useCORS: true,
+        scale: 2,
+        backgroundColor: null,
+        logging: false,
+      });
+      imgData = captured.toDataURL('image/png');
+      widthPx = captured.width;
+      heightPx = captured.height;
+    }
+
+    const aspect = heightPx / widthPx;
 
     const doc = new jsPDF('p', 'mm', 'a4');
     const pageW = doc.internal.pageSize.getWidth();
@@ -60,8 +77,6 @@ export async function exportGraphAsPdf(options) {
     const margin = 15;
     const contentW = pageW - margin * 2;
     const contentH = pageH - margin * 2;
-
-    const aspect = canvas.height / canvas.width;
     let imgW = contentW;
     let imgH = imgW * aspect;
     if (imgH > contentH) {

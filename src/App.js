@@ -4,7 +4,7 @@ import { theme } from './theme';
 import { useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import Graph from './graph/Graph.jsx';
+import GraphCanvas from './graph/GraphCanvas.jsx';
 import GraphWrapper from './graph/GraphWrapper.jsx';
 import GraphEditor from './graphEditor/GraphEditor.jsx';
 import SidePanel from './colorEditor/SidePanel.jsx';
@@ -196,7 +196,7 @@ function App() {
                 setgraphLength={setgraphLength}
                 setGraphHeight={setGraphHeight}
               >
-                <Graph
+                <GraphCanvas
                   length={safeLength}
                   height={safeHeight}
                   showGridlines={showGridlines}
