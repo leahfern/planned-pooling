@@ -2,7 +2,7 @@ import ColorItem from './ColorItem.jsx';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 const ColorList = (props) => {
-  const { colorSequence, setColorSequence } = props;
+  const { colorSequence, setColorSequence, showToast } = props;
 
   // Callback function to update color
   const updateColorItem = (colorItem) => {
@@ -48,6 +48,7 @@ const ColorList = (props) => {
                       updateColorItem={updateColorItem}
                       colorSequence={colorSequence}
                       setColorSequence={setColorSequence}
+                      showToast={showToast}
                     />
                   </div>
                 )}

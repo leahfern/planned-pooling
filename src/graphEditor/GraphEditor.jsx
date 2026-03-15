@@ -12,14 +12,17 @@ const ControlsContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: ${(props) => props.theme.spacing.large};
+  gap: ${(props) => props.theme.spacing.xlarge};
   flex-wrap: wrap;
+  margin-top: ${(props) => props.theme.spacing.medium};
+  padding-top: ${(props) => props.theme.spacing.medium};
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
 `;
 
 const ControlItem = styled.div`
   display: flex;
   align-items: center;
-  min-height: 32px;
+  min-height: 36px;
 `;
 
 const CheckboxLabel = styled.label`
@@ -27,7 +30,8 @@ const CheckboxLabel = styled.label`
   align-items: center;
   gap: ${(props) => props.theme.spacing.small};
   font-size: ${(props) => props.theme.fontSizes.small};
-  color: inherit;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
   cursor: pointer;
 `;
 
@@ -36,18 +40,19 @@ const ZoomLabel = styled.label`
   width: 100%;
   text-align: center;
   font-size: ${(props) => props.theme.fontSizes.small};
-  color: inherit;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
   margin-bottom: ${(props) => props.theme.spacing.small};
 `;
 
 const ZOOM_MIN = 0.25;
-const ZOOM_MAX = 2;
+const ZOOM_MAX = 4;
 
 const GraphEditor = (props) => {
   const {
     length,
     height,
-    setgraphLength,
+    setGraphLength,
     setGraphHeight,
     showGridlines,
     setShowGridlines,
@@ -74,7 +79,7 @@ const GraphEditor = (props) => {
         width={length}
         height={height}
         setGraphHeight={setGraphHeight}
-        setgraphLength={setgraphLength}
+        setGraphLength={setGraphLength}
         maxDimension={maxDimension}
       />
       <ControlsContainer>

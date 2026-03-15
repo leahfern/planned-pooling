@@ -50,7 +50,7 @@ const RightEdge = styled(EdgeZone)`
 const Popover = styled.div`
   position: fixed;
   z-index: 10;
-  background: ${(props) => props.theme.colors.white};
+  background: ${(props) => props.theme.colors.cardBg || props.theme.colors.white};
   border: 1px solid ${(props) => props.theme.colors.grey};
   border-radius: ${(props) => props.theme.borderRadius?.button || '8px'};
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -81,7 +81,7 @@ export default function GraphWrapper({
   children,
   graphLength,
   graphHeight,
-  setgraphLength,
+  setGraphLength,
   setGraphHeight,
 }) {
   const [popover, setPopover] = useState(null);
@@ -100,7 +100,7 @@ export default function GraphWrapper({
   const adjust = (delta) => {
     if (!popover) return;
     if (popover.type === 'column') {
-      setgraphLength(clamp(graphLength + delta, MIN_GRID_DIMENSION, MAX_GRID_DIMENSION));
+      setGraphLength(clamp(graphLength + delta, MIN_GRID_DIMENSION, MAX_GRID_DIMENSION));
     } else {
       setGraphHeight(clamp(graphHeight + delta, MIN_GRID_DIMENSION, MAX_GRID_DIMENSION));
     }

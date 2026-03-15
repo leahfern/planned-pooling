@@ -1,6 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import ColorPicker from './ColorPicker';
+
+const MIN_STITCHES = 1;
+const MAX_STITCHES = 100;
+
+function clampStitches(value, current) {
+  const n = parseInt(value, 10);
+  if (Number.isNaN(n)) return current;
+  return Math.min(MAX_STITCHES, Math.max(MIN_STITCHES, n));
+}
 
 const ColorInputContainer = styled.div``;
 
@@ -59,12 +68,28 @@ const ColorInput = ({
   setShowPicker,
   updateColorWithDetails,
 }) => {
+  const currentCount = Number(colorItem.count) || MIN_STITCHES;
+  const [countInput, setCountInput] = useState(String(currentCount));
+
+  useEffect(() => {
+    setCountInput(String(currentCount));
+  }, [currentCount]);
+
+  const commitCount = () => {
+    const next = clampStitches(countInput, currentCount);
+    onCountChange({ target: { value: String(next) } });
+  };
+
   const increment = () => {
-    onCountChange({ target: { value: parseInt(colorItem.count) + 1 } });
+    onCountChange({
+      target: { value: String(clampStitches(currentCount + 1, currentCount)) },
+    });
   };
 
   const decrement = () => {
-    onCountChange({ target: { value: parseInt(colorItem.count) - 1 } });
+    onCountChange({
+      target: { value: String(clampStitches(currentCount - 1, currentCount)) },
+    });
   };
 
   return (
@@ -83,11 +108,13 @@ const ColorInput = ({
         stitches:
         <InputWrapper>
           <Input
-            value={colorItem.count}
-            onChange={onCountChange}
+            value={countInput}
+            onChange={(e) => setCountInput(e.target.value)}
+            onBlur={commitCount}
+            onKeyDown={(e) => e.key === 'Enter' && commitCount()}
             type="number"
-            max={100}
-            min={1}
+            max={MAX_STITCHES}
+            min={MIN_STITCHES}
           />
           <StepButtonContainer>
             <StepButton onClick={increment}>arrow_drop_up</StepButton>

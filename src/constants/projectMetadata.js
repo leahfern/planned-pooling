@@ -1,3 +1,16 @@
+/** Max lengths for text inputs to keep URLs and localStorage safe and UX reasonable */
+export const INPUT_LIMITS = {
+  projectName: 200,
+  author: 100,
+  notes: 3000,
+  lotNumber: 100,
+  hookNeedleOther: 50,
+  stitchTypeOther: 50,
+  yarnBrand: 100,
+  yarnName: 100,
+  yarnColorway: 100,
+};
+
 export const HOOK_NEEDLE_SIZES = [
   { value: '', label: '—' },
   { value: '2.25mm (B/1)', label: '2.25 mm (B/1)' },

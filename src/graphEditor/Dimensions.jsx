@@ -9,73 +9,81 @@ const Title = styled.h1`
   text-align: center;
   font-family: ${(props) => props.theme.fonts.secondary};
   font-size: ${(props) => props.theme.fontSizes.xlarge};
+  font-weight: 700;
+  letter-spacing: 0.02em;
   color: inherit;
-  margin: 0 0 ${(props) => props.theme.spacing.small} 0;
+  margin: 0 0 ${(props) => props.theme.spacing.medium} 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 `;
 
 const InputPanel = styled.div`
   display: flex;
-  flex-direction: row;
-  justify-content: center;
-  gap: ${(props) => props.theme.spacing.large};
+  flex-direction: column;
+  align-items: center;
+  gap: ${(props) => props.theme.spacing.medium};
   margin-bottom: ${(props) => props.theme.spacing.medium};
 `;
 
 const InputContainer = styled.div`
   display: flex;
   flex-direction: column;
-  position: relative;
-  width: 88px;
+  align-items: center;
+  gap: ${(props) => props.theme.spacing.small};
 `;
 
-const InputWrapper = styled.div`
-  position: relative;
-  width: 100%;
+const Label = styled.span`
+  font-size: ${(props) => props.theme.fontSizes.small};
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.95);
+`;
+
+const FieldRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${(props) => props.theme.spacing.small};
+`;
+
+const StepGroup = styled.div`
+  display: flex;
+  gap: 4px;
+`;
+
+const QuickStepBtn = styled.button`
+  font-size: ${(props) => props.theme.fontSizes.small};
+  font-weight: 600;
+  padding: 6px 10px;
+  min-width: 36px;
+  border: none;
+  border-radius: 20px;
+  background: ${(props) => props.theme.colors.surface || props.theme.colors.white};
+  color: ${(props) => props.theme.colors.primary} !important;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    filter: none;
+  }
 `;
 
 const Input = styled.input`
   font-size: ${(props) => props.theme.fontSizes.medium};
   padding: ${(props) => props.theme.spacing.small};
-  border: 1px solid ${(props) => props.theme.colors.grey};
-  border-radius: 4px;
-  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  width: 72px;
+  text-align: center;
   box-sizing: border-box;
-  padding-right: ${(props) => props.theme.spacing.large};
+  transition: box-shadow 0.2s ease;
 `;
 
-const Label = styled.span`
-  font-size: ${(props) => props.theme.fontSizes.small};
-  color: inherit;
-  margin-top: ${(props) => props.theme.spacing.small};
-`;
-
-const StepButtonContainer = styled.div`
-  position: absolute;
-  right: 0;
-  top: 0;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  z-index: 1;
-  pointer-events: none;
-`;
-
-const StepButton = styled.span`
-  color: ${(props) => props.theme.colors.text} !important;
-  cursor: pointer;
-  font-family: 'Material Symbols Outlined';
-  font-size: ${(props) => props.theme.fontSizes.medium};
-  padding: 0 ${(props) => props.theme.spacing.small};
-  user-select: none;
-  pointer-events: auto;
-  &:hover {
-    color: ${(props) => props.theme.colors.primary} !important;
-  }
-`;
+const STEPS_LEFT = [-10, -5, -1];
+const STEPS_RIGHT = [1, 5, 10];
 
 const Dimensions = (props) => {
-  const { width, height, setgraphLength, setGraphHeight, maxDimension = 500 } = props;
+  const { width, height, setGraphLength, setGraphHeight, maxDimension = 500 } = props;
 
   const [widthInput, setWidthInput] = useState(String(width));
   const [heightInput, setHeightInput] = useState(String(height));
@@ -89,32 +97,49 @@ const Dimensions = (props) => {
 
   const commitWidth = () => {
     const n = parseInt(widthInput, 10);
-    setgraphLength(Number.isNaN(n) ? width : n);
+    setGraphLength(Number.isNaN(n) ? width : n);
   };
   const commitHeight = () => {
     const n = parseInt(heightInput, 10);
     setGraphHeight(Number.isNaN(n) ? height : n);
   };
 
-  const increment = (setter, value) => {
-    const n = parseInt(value, 10);
-    const next = Number.isNaN(n) ? 1 : Math.min(maxDimension, n + 1);
+  const adjustBy = (setter, current, delta, syncInput) => {
+    const n = parseInt(current, 10);
+    const base = Number.isNaN(n) ? 1 : n;
+    const next = Math.min(maxDimension, Math.max(1, base + delta));
     setter(next);
+    syncInput(String(next));
   };
 
-  const decrement = (setter, value) => {
-    const n = parseInt(value, 10);
-    const next = Number.isNaN(n) ? 1 : Math.max(1, n - 1);
-    setter(next);
-  };
+  const renderStepButtons = (steps, setter, current, syncInput, label) =>
+    steps.map((step) => (
+      <QuickStepBtn
+        key={step}
+        type="button"
+        onClick={() => adjustBy(setter, current, step, syncInput)}
+        aria-label={
+          step > 0
+            ? `Add ${step} ${label}${step !== 1 ? 's' : ''}`
+            : `Remove ${-step} ${label}${step !== -1 ? 's' : ''}`
+        }
+      >
+        {step > 0 ? `+${step}` : step}
+      </QuickStepBtn>
+    ));
 
   return (
     <DimensionsContainer>
       <Title>Planned Pooling Helper</Title>
       <InputPanel>
         <InputContainer>
-          <InputWrapper>
+          <Label as="label" htmlFor="columns">Columns</Label>
+          <FieldRow>
+            <StepGroup>
+              {renderStepButtons(STEPS_LEFT, setGraphLength, width, setWidthInput, 'column')}
+            </StepGroup>
             <Input
+              id="columns"
               type="number"
               value={widthInput}
               onChange={(e) => setWidthInput(e.target.value)}
@@ -122,21 +147,21 @@ const Dimensions = (props) => {
               onKeyDown={(e) => e.key === 'Enter' && commitWidth()}
               max={maxDimension}
               min={1}
+              aria-label="Columns"
             />
-            <StepButtonContainer>
-              <StepButton onClick={() => increment(setgraphLength, width)}>
-                arrow_drop_up
-              </StepButton>
-              <StepButton onClick={() => decrement(setgraphLength, width)}>
-                arrow_drop_down
-              </StepButton>
-            </StepButtonContainer>
-          </InputWrapper>
-          <Label>Columns</Label>
+            <StepGroup>
+              {renderStepButtons(STEPS_RIGHT, setGraphLength, width, setWidthInput, 'column')}
+            </StepGroup>
+          </FieldRow>
         </InputContainer>
         <InputContainer>
-          <InputWrapper>
+          <Label as="label" htmlFor="rows">Rows</Label>
+          <FieldRow>
+            <StepGroup>
+              {renderStepButtons(STEPS_LEFT, setGraphHeight, height, setHeightInput, 'row')}
+            </StepGroup>
             <Input
+              id="rows"
               type="number"
               value={heightInput}
               onChange={(e) => setHeightInput(e.target.value)}
@@ -144,17 +169,12 @@ const Dimensions = (props) => {
               onKeyDown={(e) => e.key === 'Enter' && commitHeight()}
               max={maxDimension}
               min={1}
+              aria-label="Rows"
             />
-            <StepButtonContainer>
-              <StepButton onClick={() => increment(setGraphHeight, height)}>
-                arrow_drop_up
-              </StepButton>
-              <StepButton onClick={() => decrement(setGraphHeight, height)}>
-                arrow_drop_down
-              </StepButton>
-            </StepButtonContainer>
-          </InputWrapper>
-          <Label>Rows</Label>
+            <StepGroup>
+              {renderStepButtons(STEPS_RIGHT, setGraphHeight, height, setHeightInput, 'row')}
+            </StepGroup>
+          </FieldRow>
         </InputContainer>
       </InputPanel>
     </DimensionsContainer>

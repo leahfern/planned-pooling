@@ -8,14 +8,24 @@ const getContrastTextColor = (hexColor) => {
 };
 
 const getColorDetails = async (hexColor) => {
+  if (typeof hexColor !== 'string') {
+    return { name: '#000000', hex: '#000000', textColor: '#FFFFFF' };
+  }
+  let normalized = hexColor.trim();
+  if (normalized.startsWith('#')) {
+    normalized = normalized.slice(1);
+  }
+  if (!/^[0-9A-Fa-f]{6}$/.test(normalized)) {
+    const hex = hexColor.startsWith('#') ? hexColor : `#${hexColor}`;
+    return {
+      name: hex,
+      hex,
+      textColor: getContrastTextColor('000000'),
+    };
+  }
   try {
-    //if first character of hexColor string is #, remove it
-    if (hexColor[0] === '#') {
-      hexColor = hexColor.slice(1);
-    }
-    // Fetch color details from the API
     const response = await fetch(
-      `https://api.color.pizza/v1/?values=${hexColor}`
+      `https://api.color.pizza/v1/?values=${normalized}`
     );
     const data = await response.json();
 
@@ -23,18 +33,18 @@ const getColorDetails = async (hexColor) => {
     const colorItem = data.colors[0];
 
     // Check each item and provide a default value if necessary
-    const name = colorItem.name || `#${hexColor}`;
-    const hex = colorItem.hex || `#${hexColor}`;
-    const textColor = colorItem.bestContrast || getContrastTextColor(hexColor);
+    const name = colorItem.name || `#${normalized}`;
+    const hex = colorItem.hex || `#${normalized}`;
+    const textColor = colorItem.bestContrast || getContrastTextColor(normalized);
 
     return { name, hex, textColor };
   } catch (error) {
     console.error('Failed to fetch color details:', error);
-    // Return default values
+    const hex = `#${normalized}`;
     return {
-      name: `#${hexColor}`,
-      hex: `#${hexColor}`,
-      textColor: getContrastTextColor(hexColor),
+      name: hex,
+      hex,
+      textColor: getContrastTextColor(normalized),
     };
   }
 };

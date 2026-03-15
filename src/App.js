@@ -1,7 +1,8 @@
 import styled, { ThemeProvider } from 'styled-components';
 import { GlobalStyle } from './GlobalStyle';
-import { theme } from './theme';
-import { useState, useRef } from 'react';
+import { lightTheme, darkTheme } from './theme';
+import usePreferredColorScheme from './hooks/usePreferredColorScheme';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import GraphCanvas from './graph/GraphCanvas.jsx';
@@ -18,6 +19,7 @@ import { getExportFileName } from './hooks/useSavedProjects';
 import { exportGraphAsImage } from './utils/exportGraphAsImage';
 import { exportGraphAsPdf } from './utils/exportGraphAsPdf';
 import { MIN_GRID_DIMENSION, MAX_GRID_DIMENSION } from './constants/grid';
+import { Toast } from './Toast';
 
 const SIDEBAR_TAB_WIDTH = 56;
 
@@ -38,11 +40,12 @@ const AppContainer = styled.div`
 const TopBar = styled.div`
   width: 100%;
   flex-shrink: 0;
-  background: ${(props) => props.theme.colors.primary};
+  background: linear-gradient(135deg, ${(props) => props.theme.colors.primary} 0%, ${(props) => props.theme.colors.primaryDark || props.theme.colors.primary} 100%);
   color: ${(props) => props.theme.colors.white};
-  padding: ${(props) => props.theme.spacing.medium}
+  padding: ${(props) => props.theme.spacing.large}
     ${(props) => props.theme.spacing.large};
   box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 
   button {
     color: inherit;
@@ -53,16 +56,26 @@ const TopBar = styled.div`
     color: rgba(255, 255, 255, 0.95);
   }
   input[type='number'] {
-    background: ${(props) => props.theme.colors.white};
+    background: ${(props) => props.theme.colors.surface || props.theme.colors.white};
     color: ${(props) => props.theme.colors.text};
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  input[type='number']:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px ${(props) => props.theme.colors.accent};
   }
   select {
-    background: ${(props) => props.theme.colors.white} !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23008080' d='M6 8L1 3h10z'/%3E%3C/svg%3E") !important;
+    background: ${(props) => props.theme.colors.surface || props.theme.colors.white} !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='${(props) => encodeURIComponent(props.theme.colors.primary)}' d='M6 8L1 3h10z'/%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
     background-position: right 12px center !important;
-    padding-right: 32px !important;
-    color: ${(props) => props.theme.colors.primary} !important;
+    padding: 8px 32px 8px 12px !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(0,0,0,0.06) !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06) !important;
+    color: ${(props) => props.theme.colors.text} !important;
   }
 `;
 
@@ -89,31 +102,31 @@ const defaultParams = {
   colorSequence: [
     {
       sequence: 1,
-      hex: '#ff0505',
+      hex: '#008080',
       count: 3,
-      textColor: 'black',
-      name: 'Stoplight',
+      textColor: 'white',
+      name: 'Teal',
     },
     {
       sequence: 2,
-      hex: '#000000',
+      hex: '#C65D3B',
       count: 7,
       textColor: 'white',
-      name: 'Black',
+      name: 'Terracotta',
     },
     {
       sequence: 3,
-      hex: '#2a1dde',
+      hex: '#FFD700',
       count: 3,
-      textColor: 'white',
-      name: 'Blue Angel',
+      textColor: 'black',
+      name: 'Gold',
     },
     {
       sequence: 4,
-      hex: '#ffffff',
+      hex: '#F5F5DC',
       count: 1,
       textColor: 'black',
-      name: 'White',
+      name: 'Cream',
     },
   ],
   showSidePanel: true,
@@ -129,11 +142,33 @@ const defaultParams = {
   yarnColorway: '',
 };
 
+const TOAST_DURATION_MS = 3000;
+
 function App() {
+  const colorScheme = usePreferredColorScheme();
+  const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
   const location = useLocation();
   const [params, setParams] = useUrlParams(defaultParams);
   const [currentProject, setCurrentProject] = useState(null);
+  const [toast, setToast] = useState(null);
   const graphRef = useRef(null);
+  const toastTimerRef = useRef(null);
+
+  const showToast = useCallback((message, type = 'success') => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToast({ message, type });
+    toastTimerRef.current = setTimeout(() => {
+      setToast(null);
+      toastTimerRef.current = null;
+    }, TOAST_DURATION_MS);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
+  }, []);
+
   const shareUrl =
     typeof window !== 'undefined'
       ? window.location.origin + location.pathname + location.search
@@ -154,7 +189,7 @@ function App() {
 
   const setGraphHeight = (value) =>
     setParams({ ...params, graphHeight: clampDimension(value, graphHeight) });
-  const setgraphLength = (value) =>
+  const setGraphLength = (value) =>
     setParams({ ...params, graphLength: clampDimension(value, graphLength) });
   const setShowGridlines = (value) =>
     setParams({ ...params, showGridlines: value });
@@ -166,8 +201,9 @@ function App() {
     setParams({ ...params, colorSequence: value });
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme} key={colorScheme}>
       <GlobalStyle />
+      {toast && <Toast message={toast.message} type={toast.type} />}
       <AppContainer>
         <TopBar>
           <Instructions />
@@ -175,7 +211,7 @@ function App() {
             length={safeLength}
             height={safeHeight}
             setGraphHeight={setGraphHeight}
-            setgraphLength={setgraphLength}
+            setGraphLength={setGraphLength}
             maxDimension={MAX_GRID_DIMENSION}
             showGridlines={showGridlines}
             setShowGridlines={setShowGridlines}
@@ -193,7 +229,7 @@ function App() {
               <GraphWrapper
                 graphLength={safeLength}
                 graphHeight={safeHeight}
-                setgraphLength={setgraphLength}
+                setGraphLength={setGraphLength}
                 setGraphHeight={setGraphHeight}
               >
                 <GraphCanvas
@@ -218,13 +254,17 @@ function App() {
                 alignItems: 'center',
               }}
             >
-              <ShareButton />
+              <ShareButton onCopySuccess={() => showToast('URL copied to clipboard')} onCopyError={() => showToast('Failed to copy URL', 'error')} />
               <button
                 type="button"
                 onClick={() =>
                   exportGraphAsImage(
                     graphRef.current,
                     getExportFileName(currentProject?.name, 'png'),
+                    {
+                      onSuccess: () => showToast('Image exported'),
+                      onError: () => showToast('Failed to export image', 'error'),
+                    },
                   )
                 }
               >
@@ -240,6 +280,8 @@ function App() {
                     projectTitle: currentProject?.name,
                     projectAuthor: currentProject?.author,
                     shareUrl,
+                    onSuccess: () => showToast('PDF exported'),
+                    onError: () => showToast('Failed to export PDF', 'error'),
                   })
                 }
               >
@@ -251,6 +293,7 @@ function App() {
                 defaultParams={defaultParams}
                 currentProject={currentProject}
                 setCurrentProject={setCurrentProject}
+                showToast={showToast}
               />
             </div>
           </MainContent>
@@ -262,6 +305,7 @@ function App() {
           setColorSequence={setColorSequence}
           params={params}
           setParams={setParams}
+          showToast={showToast}
         />
       </AppContainer>
     </ThemeProvider>

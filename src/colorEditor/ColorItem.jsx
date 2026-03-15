@@ -34,7 +34,7 @@ const DeleteButton = styled.div`
 `;
 
 const ColorItem = (props) => {
-  const { colorItem, updateColorItem, colorSequence, setColorSequence } = props;
+  const { colorItem, updateColorItem, colorSequence, setColorSequence, showToast } = props;
 
   const [showPicker, setShowPicker] = useState(false);
 
@@ -50,7 +50,10 @@ const ColorItem = (props) => {
 
   const handleCountChange = (e) => {
     const inputValue = e.target.value;
-    const newCount = inputValue ? parseInt(inputValue, 10) : 0; // Default to 0 if input is empty
+    const parsed = inputValue ? parseInt(inputValue, 10) : NaN;
+    const newCount = Number.isNaN(parsed)
+      ? colorItem.count
+      : Math.min(100, Math.max(1, parsed));
     updateColorItem({ ...colorItem, count: newCount });
   };
 
@@ -60,6 +63,7 @@ const ColorItem = (props) => {
       .filter((color) => color.sequence !== colorItem.sequence)
       .map((item, index) => ({ ...item, sequence: index + 1 }));
     setColorSequence(newSequence);
+    showToast?.('Color removed');
   };
 
   return (

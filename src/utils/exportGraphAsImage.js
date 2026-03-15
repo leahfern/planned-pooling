@@ -1,6 +1,7 @@
 import html2canvas from 'html2canvas';
 
-export async function exportGraphAsImage(node, filename = 'planned-pooling-pattern.png') {
+export async function exportGraphAsImage(node, filename = 'planned-pooling-pattern.png', options = {}) {
+  const { onError, onSuccess } = options;
   if (!node) return;
   try {
     const gridEl = node.firstElementChild || node;
@@ -24,8 +25,9 @@ export async function exportGraphAsImage(node, filename = 'planned-pooling-patte
     link.download = filename;
     link.href = dataUrl;
     link.click();
+    onSuccess?.();
   } catch (err) {
     console.error('Image export failed:', err);
-    alert('Failed to export image');
+    onError?.();
   }
 }

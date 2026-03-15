@@ -40,6 +40,8 @@ export async function exportGraphAsPdf(options) {
     projectTitle,
     projectAuthor,
     shareUrl,
+    onError,
+    onSuccess,
   } = options;
 
   if (!graphNode || !params) return;
@@ -54,9 +56,9 @@ export async function exportGraphAsPdf(options) {
     let heightPx;
 
     if (drawableCanvas) {
-      imgData = drawableCanvas.toDataURL('image/png');
       widthPx = drawableCanvas.width;
       heightPx = drawableCanvas.height;
+      imgData = drawableCanvas.toDataURL('image/png');
     } else {
       const captured = await html2canvas(gridEl, {
         useCORS: true,
@@ -64,9 +66,27 @@ export async function exportGraphAsPdf(options) {
         backgroundColor: null,
         logging: false,
       });
-      imgData = captured.toDataURL('image/png');
       widthPx = captured.width;
       heightPx = captured.height;
+      imgData = captured.toDataURL('image/png');
+    }
+
+    const MAX_IMG_PX = 2000;
+    if (
+      drawableCanvas &&
+      (widthPx > MAX_IMG_PX || heightPx > MAX_IMG_PX)
+    ) {
+      const scale = MAX_IMG_PX / Math.max(widthPx, heightPx);
+      const scaledW = Math.round(widthPx * scale);
+      const scaledH = Math.round(heightPx * scale);
+      const off = document.createElement('canvas');
+      off.width = scaledW;
+      off.height = scaledH;
+      const ctx = off.getContext('2d');
+      ctx.drawImage(drawableCanvas, 0, 0, widthPx, heightPx, 0, 0, scaledW, scaledH);
+      imgData = off.toDataURL('image/png');
+      widthPx = scaledW;
+      heightPx = scaledH;
     }
 
     const aspect = heightPx / widthPx;
@@ -87,11 +107,15 @@ export async function exportGraphAsPdf(options) {
 
     let y = margin + imgH + 12;
 
-    if (y > pageH - 80) {
-      doc.addPage();
-      y = margin;
-    }
+    const ensureSpace = (needed) => {
+      if (y + needed > pageH - margin) {
+        doc.addPage();
+        return margin;
+      }
+      return y;
+    };
 
+    y = ensureSpace(80);
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
     doc.text(SITE_NAME, margin, y);
@@ -100,55 +124,88 @@ export async function exportGraphAsPdf(options) {
     if (projectTitle || projectAuthor) {
       doc.setFontSize(11);
       doc.setFont(undefined, 'normal');
-      doc.text([projectTitle, projectAuthor].filter(Boolean).join(' — '), margin, y);
-      y += 6;
+      const titleAuthor = [projectTitle, projectAuthor].filter(Boolean).join(' — ');
+      const titleLines = doc.splitTextToSize(titleAuthor, contentW);
+      titleLines.forEach((line) => {
+        doc.text(line, margin, y);
+        y += 6;
+      });
     }
 
+    y = ensureSpace(100);
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
     doc.text('Settings', margin, y);
     y += 5;
     doc.setFont(undefined, 'normal');
-    doc.text(`Stitches per row: ${params.graphLength}`, margin, y);
-    y += 5;
-    doc.text(`Number of rows: ${params.graphHeight}`, margin, y);
-    y += 5;
-    doc.text(`Stitch pattern: ${formatStitchPattern(params.stitchPattern)}`, margin, y);
-    y += 5;
-    doc.text(`Gridlines: ${params.showGridlines ? 'On' : 'Off'}`, margin, y);
+    const settingsLines = [
+      `Stitches per row: ${params.graphLength}`,
+      `Number of rows: ${params.graphHeight}`,
+      `Stitch pattern: ${formatStitchPattern(params.stitchPattern)}`,
+      `Gridlines: ${params.showGridlines ? 'On' : 'Off'}`,
+    ];
+    settingsLines.forEach((text) => {
+      doc.splitTextToSize(text, contentW).forEach((line) => {
+        doc.text(line, margin, y);
+        y += 5;
+      });
+    });
     const hookNeedle = formatHookNeedle(params);
     if (hookNeedle) {
-      y += 5;
-      doc.text(`Hook/needle: ${hookNeedle}`, margin, y);
+      y = ensureSpace(25);
+      doc.splitTextToSize(`Hook/needle: ${hookNeedle}`, contentW).forEach((line) => {
+        doc.text(line, margin, y);
+        y += 5;
+      });
     }
     const stitchType = formatStitchType(params);
     if (stitchType) {
-      y += 5;
-      doc.text(`Stitch type: ${stitchType}`, margin, y);
+      y = ensureSpace(25);
+      doc.splitTextToSize(`Stitch type: ${stitchType}`, contentW).forEach((line) => {
+        doc.text(line, margin, y);
+        y += 5;
+      });
     }
     if (params.lotNumber) {
-      y += 5;
-      doc.text(`Lot number: ${params.lotNumber}`, margin, y);
+      y = ensureSpace(25);
+      doc.splitTextToSize(`Lot number: ${String(params.lotNumber)}`, contentW).forEach((line) => {
+        doc.text(line, margin, y);
+        y += 5;
+      });
     }
     const yarnParts = [params.yarnBrand, params.yarnName, params.yarnColorway].filter(Boolean);
     if (yarnParts.length) {
-      y += 5;
-      doc.text(`Yarn: ${yarnParts.join(' — ')}`, margin, y);
+      y = ensureSpace(25);
+      doc.splitTextToSize(`Yarn: ${yarnParts.join(' — ')}`, contentW).forEach((line) => {
+        doc.text(line, margin, y);
+        y += 5;
+      });
     }
     y += 8;
     if (params.notes) {
+      const notesLines = doc.splitTextToSize(String(params.notes), contentW);
+      y = ensureSpace(20 + notesLines.length * 5);
       doc.setFont(undefined, 'bold');
       doc.text('Notes', margin, y);
       y += 5;
       doc.setFont(undefined, 'normal');
-      const lines = doc.splitTextToSize(params.notes, contentW);
-      lines.forEach((line) => {
+      notesLines.forEach((line) => {
         doc.text(line, margin, y);
         y += 5;
       });
       y += 8;
     }
 
+    const colorList = params.colorSequence || [];
+    const colorBlockHeight =
+      10 +
+      colorList.reduce((sum, c) => {
+        const parts = [c.name, c.hex].filter(Boolean);
+        const label = parts.length ? parts.join(' ') : `Color ${c.sequence}`;
+        const colorText = `${label}: ${c.count} stitches`;
+        return sum + doc.splitTextToSize(colorText, contentW).length * 5;
+      }, 0);
+    y = ensureSpace(colorBlockHeight);
     doc.setFont(undefined, 'bold');
     doc.text('Colors', margin, y);
     y += 5;
@@ -156,24 +213,36 @@ export async function exportGraphAsPdf(options) {
     (params.colorSequence || []).forEach((c) => {
       const parts = [c.name, c.hex].filter(Boolean);
       const label = parts.length ? parts.join(' ') : `Color ${c.sequence}`;
-      doc.text(`${label}: ${c.count} stitches`, margin, y);
-      y += 5;
+      const colorText = `${label}: ${c.count} stitches`;
+      doc.splitTextToSize(colorText, contentW).forEach((line) => {
+        doc.text(line, margin, y);
+        y += 5;
+      });
     });
     y += 8;
+
+    const qrSize = 25;
+    const urlLines = doc.splitTextToSize(shareUrl || window.location.href, contentW);
+    const qrBlockHeight = qrSize + 15 + urlLines.length * 5;
+    y = ensureSpace(qrBlockHeight);
 
     const qrDataUrl = await QRCode.toDataURL(shareUrl || window.location.href, {
       width: 120,
       margin: 1,
     });
-    const qrSize = 25;
     doc.addImage(qrDataUrl, 'PNG', margin, y, qrSize, qrSize);
     doc.setFontSize(9);
     doc.text('Scan to open this pattern', margin, y + qrSize + 5);
-    doc.text(shareUrl || window.location.href, margin, y + qrSize + 10);
+    let urlY = y + qrSize + 10;
+    urlLines.forEach((line) => {
+      doc.text(line, margin, urlY);
+      urlY += 5;
+    });
 
     doc.save(filename);
+    onSuccess?.();
   } catch (err) {
     console.error('PDF export failed:', err);
-    alert('Failed to export PDF');
+    onError?.();
   }
 }

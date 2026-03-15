@@ -23,7 +23,7 @@ const AddColorButton = styled.button`
   }
 `;
 
-const AddColor = ({ colorSequence, setColorSequence }) => {
+const AddColor = ({ colorSequence, setColorSequence, showToast }) => {
   const generateNewColor = async () => {
     const numStitches = Math.floor(Math.random() * 5) + 1;
     const randomColor = getRandomColor();
@@ -38,6 +38,7 @@ const AddColor = ({ colorSequence, setColorSequence }) => {
   const addColor = async (e) => {
     e.preventDefault();
     setColorSequence([...colorSequence, await generateNewColor()]);
+    showToast?.('Color added');
   };
 
   return (

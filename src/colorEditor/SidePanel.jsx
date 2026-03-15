@@ -31,10 +31,10 @@ const SidePanelContainer = styled.div`
   box-shadow: -4px 0 16px rgba(0, 0, 0, 0.12);
   padding: ${(props) =>
     props.$open ? props.theme.spacing.medium : '12px 10px'};
-  background: ${(props) => props.theme.colors.white};
+  background: ${(props) => props.theme.colors.cardBg || props.theme.colors.white};
   transition: width 0.25s ease-in-out;
   z-index: 999;
-  overflow: hidden;
+  overflow: visible;
 `;
 
 const ButtonContainer = styled.div`
@@ -60,7 +60,7 @@ const Title = styled.h2`
 `;
 
 const SidePanel = (props) => {
-  const { colorSequence, setColorSequence, showSidePanel, setShowSidePanel, params, setParams } = props;
+  const { colorSequence, setColorSequence, showSidePanel, setShowSidePanel, params, setParams, showToast } = props;
 
   const openCloseIcon = showSidePanel ? 'chevron_right' : 'palette';
 
@@ -75,26 +75,31 @@ const SidePanel = (props) => {
       <SidePanelContainer $open={showSidePanel}>
         <ButtonContainer>
           <button
+            type="button"
             onClick={() => setShowSidePanel(!showSidePanel)}
             className="material-symbols-outlined"
             width="fit-content"
             aria-label={showSidePanel ? 'Close color list' : 'Open color list'}
+            aria-expanded={showSidePanel}
+            data-testid="toggleSidePanelButton"
           >
             {openCloseIcon}
           </button>
         </ButtonContainer>
-        <SidePanelContent $open={showSidePanel}>
+        <SidePanelContent $open={showSidePanel} data-testid="sidePanelContent">
           <Title>Color list</Title>
-          <SavedYarns params={params} setParams={setParams} />
+          <SavedYarns params={params} setParams={setParams} showToast={showToast} />
           <ColorList
             colorSequence={colorSequence}
             setColorSequence={setColorSequence}
+            showToast={showToast}
           />
         </SidePanelContent>
         {showSidePanel && (
           <AddColor
             colorSequence={colorSequence}
             setColorSequence={setColorSequence}
+            showToast={showToast}
           />
         )}
       </SidePanelContainer>

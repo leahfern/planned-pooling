@@ -1,10 +1,10 @@
 import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyle = createGlobalStyle`
-  @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Roboto:wght@400;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Nunito:wght@400;600;700&family=Roboto:wght@400;700&display=swap');
 
   body {
-    background-color: ${(props) => props.theme.colors.white};
+    background-color: ${(props) => props.theme.colors.background || props.theme.colors.white};
     font-family: ${(props) => props.theme.fonts.primary};
     color: ${(props) => props.theme.colors.text};
     margin: 0;
@@ -188,4 +188,33 @@ export const GlobalStyle = createGlobalStyle`
   .app-color-picker-wrap .chrome-picker > div:first-child > div > div[style*="translate(-6px, -6px)"] {
     box-shadow: inset 0 0 0 1px rgba(255,255,255,0.8), 0 0 0 2px rgba(0,0,0,0.4) !important;
   }
+
+  /* ChromePicker dark mode: when theme.dark is true, style the picker for dark backgrounds */
+  ${(props) =>
+    props.theme.dark
+      ? `
+  .app-color-picker-wrap .chrome-picker {
+    background: ${props.theme.colors.cardBg} !important;
+  }
+  .app-color-picker-wrap .chrome-picker > div {
+    background: transparent !important;
+  }
+  .app-color-picker-wrap .chrome-picker input,
+  .app-color-picker-wrap .chrome-picker input[type="text"] {
+    background: ${props.theme.colors.surface} !important;
+    color: ${props.theme.colors.text} !important;
+    border-color: ${props.theme.colors.grey} !important;
+  }
+  .app-color-picker-wrap .chrome-picker label,
+  .app-color-picker-wrap .chrome-picker span:not([class]) {
+    color: ${props.theme.colors.text} !important;
+  }
+  .app-color-picker-wrap .chrome-picker > div:last-child > div {
+    color: ${props.theme.colors.text} !important;
+  }
+  .app-color-picker-wrap .chrome-picker a {
+    color: ${props.theme.colors.primary} !important;
+  }
+  `
+      : ''}
 `;

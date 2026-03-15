@@ -4,7 +4,7 @@ import { HOOK_NEEDLE_SIZES, STITCH_TYPES } from './constants/projectMetadata';
 const Strip = styled.div`
   width: 100%;
   flex-shrink: 0;
-  background: ${(props) => props.theme.colors.white};
+  background: ${(props) => props.theme.colors.cardBg || props.theme.colors.white};
   padding: ${(props) => props.theme.spacing.medium} ${(props) => props.theme.spacing.large};
   border-left: 4px solid ${(props) => props.theme.colors.primary};
   border-bottom: 1px solid ${(props) => props.theme.colors.grey};

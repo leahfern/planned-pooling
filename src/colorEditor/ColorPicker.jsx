@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import styled from 'styled-components';
 import { ChromePicker } from 'react-color';
 
@@ -13,12 +14,10 @@ const EditIcon = styled.span`
 `;
 
 const Popup = styled.div`
-  position: absolute;
-  z-index: 2;
-  top: 0;
-  right: 50%;
+  position: fixed;
+  z-index: 1001;
   cursor: crosshair;
-  background: ${(props) => props.theme.colors.white};
+  background: ${(props) => props.theme.colors.cardBg || props.theme.colors.white};
   padding: ${(props) => props.theme.spacing.small};
   border-radius: ${(props) => props.theme.borderRadius?.button || '8px'};
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
@@ -59,7 +58,9 @@ const ColorPicker = ({
   updateColorWithDetails,
 }) => {
   const [initialColor, setInitialColor] = useState(color);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
   const popupRef = useRef(null);
+  const anchorRef = useRef(null);
 
   const handleColorChange = (newColor) => {
     onChange(newColor.hex);
@@ -70,15 +71,21 @@ const ColorPicker = ({
     setShowPicker(true);
   };
 
-  const handleSave = () => {
+  useEffect(() => {
+    if (!showPicker || !anchorRef.current) return;
+    const rect = anchorRef.current.getBoundingClientRect();
+    setPosition({ top: rect.top, left: rect.left });
+  }, [showPicker]);
+
+  const handleSave = useCallback(() => {
     setShowPicker(false);
     updateColorWithDetails(color);
-  };
+  }, [color, setShowPicker, updateColorWithDetails]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setShowPicker(false);
     onChange(initialColor);
-  };
+  }, [initialColor, onChange, setShowPicker]);
 
   useEffect(() => {
     if (!showPicker) return;
@@ -95,28 +102,53 @@ const ColorPicker = ({
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [showPicker]);
+  }, [showPicker, handleCancel]);
+
+  useEffect(() => {
+    if (!showPicker) return;
+    const onMouseDown = (e) => {
+      const popup = popupRef.current;
+      const anchor = anchorRef.current;
+      if (
+        popup?.contains(e.target) ||
+        anchor?.contains(e.target)
+      ) return;
+      handleCancel();
+    };
+    document.addEventListener('mousedown', onMouseDown);
+    return () => document.removeEventListener('mousedown', onMouseDown);
+  }, [showPicker, handleCancel]);
+
+  const popupContent = showPicker && (
+    <Popup
+      ref={popupRef}
+      tabIndex={-1}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Color picker — use Save to apply or Cancel to discard changes"
+      style={{
+        top: position.top,
+        left: position.left,
+        transform: 'translateX(-100%)',
+        marginLeft: '-8px',
+      }}
+    >
+      <PickerWrap className="app-color-picker-wrap">
+        <ChromePicker color={color} onChange={handleColorChange} />
+      </PickerWrap>
+      <ButtonContainer>
+        <Button type="button" onClick={handleSave}>Save</Button>
+        <Button type="button" onClick={handleCancel}>Cancel</Button>
+      </ButtonContainer>
+    </Popup>
+  );
 
   return (
-    <PickerContainer>
+    <PickerContainer ref={anchorRef}>
       <EditIcon onClick={handleOpen}>edit</EditIcon>
-      {showPicker && (
-        <Popup
-          ref={popupRef}
-          tabIndex={-1}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Color picker — use Save to apply or Cancel to discard changes"
-        >
-          <PickerWrap className="app-color-picker-wrap">
-            <ChromePicker color={color} onChange={handleColorChange} />
-          </PickerWrap>
-          <ButtonContainer>
-            <Button type="button" onClick={handleSave}>Save</Button>
-            <Button type="button" onClick={handleCancel}>Cancel</Button>
-          </ButtonContainer>
-        </Popup>
-      )}
+      {typeof document !== 'undefined' && popupContent
+        ? createPortal(popupContent, document.body)
+        : null}
     </PickerContainer>
   );
 };

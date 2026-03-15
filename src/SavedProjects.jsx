@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { getSaves, saveProject, deleteSave } from './hooks/useSavedProjects';
-import { HOOK_NEEDLE_SIZES, STITCH_TYPES } from './constants/projectMetadata';
+import { HOOK_NEEDLE_SIZES, STITCH_TYPES, INPUT_LIMITS } from './constants/projectMetadata';
 
 const ButtonGroup = styled.div`
   display: flex;
@@ -35,7 +35,7 @@ const Overlay = styled.div`
 `;
 
 const Modal = styled.div`
-  background: ${(props) => props.theme.colors.white};
+  background: ${(props) => props.theme.colors.cardBg || props.theme.colors.white};
   padding: ${(props) => props.theme.spacing.large};
   border-radius: 8px;
   min-width: 320px;
@@ -133,7 +133,7 @@ const EmptyMessage = styled.p`
   margin: 0;
 `;
 
-function SavedProjects({ params, setParams, defaultParams, currentProject, setCurrentProject }) {
+function SavedProjects({ params, setParams, defaultParams, currentProject, setCurrentProject, showToast }) {
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [listModalOpen, setListModalOpen] = useState(false);
   const [saveName, setSaveName] = useState('');
@@ -165,6 +165,7 @@ function SavedProjects({ params, setParams, defaultParams, currentProject, setCu
     const saved = saveProject({ name, author, params, id: currentProject?.id });
     setCurrentProject({ id: saved.id, name: saved.name, author: saved.author });
     setSaveModalOpen(false);
+    showToast?.(currentProject?.id ? 'Project updated' : 'Project saved');
   };
 
   const handleOpenList = () => {
@@ -176,12 +177,14 @@ function SavedProjects({ params, setParams, defaultParams, currentProject, setCu
     setParams({ ...defaultParams, ...save.params });
     setCurrentProject({ id: save.id, name: save.name, author: save.author || '' });
     setListModalOpen(false);
+    showToast?.('Project loaded');
   };
 
   const handleDelete = (id) => {
     deleteSave(id);
     if (currentProject?.id === id) setCurrentProject(null);
     refreshSaves();
+    showToast?.('Project deleted');
   };
 
   return (
@@ -192,7 +195,7 @@ function SavedProjects({ params, setParams, defaultParams, currentProject, setCu
         </Button>
         <Button type="button" onClick={handleOpenList}>My projects</Button>
         {currentProject?.id && (
-          <Button type="button" onClick={() => { setCurrentProject(null); setParams(defaultParams); }}>New project</Button>
+          <Button type="button" onClick={() => { setCurrentProject(null); setParams(defaultParams); showToast?.('New project started'); }}>New project</Button>
         )}
       </ButtonGroup>
 
@@ -204,11 +207,11 @@ function SavedProjects({ params, setParams, defaultParams, currentProject, setCu
               {saveError && <SaveError>{saveError}</SaveError>}
               <Field>
                 <label htmlFor="save-name">Project name</label>
-                <input id="save-name" type="text" value={saveName} onChange={(e) => setSaveName(e.target.value)} placeholder="e.g. My Scarf Pattern" autoFocus />
+                <input id="save-name" type="text" value={saveName} onChange={(e) => setSaveName(e.target.value)} placeholder="e.g. My Scarf Pattern" maxLength={INPUT_LIMITS.projectName} autoFocus />
               </Field>
               <Field>
                 <label htmlFor="save-author">Author (optional)</label>
-                <input id="save-author" type="text" value={saveAuthor} onChange={(e) => setSaveAuthor(e.target.value)} placeholder="Your name" />
+                <input id="save-author" type="text" value={saveAuthor} onChange={(e) => setSaveAuthor(e.target.value)} placeholder="Your name" maxLength={INPUT_LIMITS.author} />
               </Field>
               <Field>
                 <label htmlFor="hook-needle">Hook / needle size (optional)</label>
@@ -219,7 +222,7 @@ function SavedProjects({ params, setParams, defaultParams, currentProject, setCu
               {params.hookNeedleSize === 'other' && (
                 <Field>
                   <label htmlFor="hook-needle-other">Hook / needle size (other)</label>
-                  <input id="hook-needle-other" type="text" value={params.hookNeedleSizeOther ?? ''} onChange={(e) => setParams({ ...params, hookNeedleSizeOther: e.target.value })} placeholder="e.g. 3 mm" />
+                  <input id="hook-needle-other" type="text" value={params.hookNeedleSizeOther ?? ''} onChange={(e) => setParams({ ...params, hookNeedleSizeOther: e.target.value })} placeholder="e.g. 3 mm" maxLength={INPUT_LIMITS.hookNeedleOther} />
                 </Field>
               )}
               <Field>
@@ -231,16 +234,16 @@ function SavedProjects({ params, setParams, defaultParams, currentProject, setCu
               {params.stitchType === 'other' && (
                 <Field>
                   <label htmlFor="stitch-type-other">Stitch type (other)</label>
-                  <input id="stitch-type-other" type="text" value={params.stitchTypeOther ?? ''} onChange={(e) => setParams({ ...params, stitchTypeOther: e.target.value })} placeholder="e.g. Lemon peel" />
+                  <input id="stitch-type-other" type="text" value={params.stitchTypeOther ?? ''} onChange={(e) => setParams({ ...params, stitchTypeOther: e.target.value })} placeholder="e.g. Lemon peel" maxLength={INPUT_LIMITS.stitchTypeOther} />
                 </Field>
               )}
               <Field>
                 <label htmlFor="lot-number">Lot number (optional)</label>
-                <input id="lot-number" type="text" value={params.lotNumber ?? ''} onChange={(e) => setParams({ ...params, lotNumber: e.target.value })} placeholder="Yarn lot/dye lot" />
+                <input id="lot-number" type="text" value={params.lotNumber ?? ''} onChange={(e) => setParams({ ...params, lotNumber: e.target.value })} placeholder="Yarn lot/dye lot" maxLength={INPUT_LIMITS.lotNumber} />
               </Field>
               <Field>
                 <label htmlFor="notes">Notes (optional)</label>
-                <textarea id="notes" value={params.notes ?? ''} onChange={(e) => setParams({ ...params, notes: e.target.value })} placeholder="Gauge, yardage, pattern notes…" />
+                <textarea id="notes" value={params.notes ?? ''} onChange={(e) => setParams({ ...params, notes: e.target.value })} placeholder="Gauge, yardage, pattern notes…" maxLength={INPUT_LIMITS.notes} />
               </Field>
               <ModalActions>
                 <Button type="button" onClick={() => setSaveModalOpen(false)}>Cancel</Button>

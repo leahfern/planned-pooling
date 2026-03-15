@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { getSavedYarns, saveYarn, deleteYarn } from './hooks/useSavedYarns';
+import { INPUT_LIMITS } from './constants/projectMetadata';
 
 const ButtonGroup = styled.div`
   display: flex;
@@ -36,7 +37,7 @@ const Overlay = styled.div`
 `;
 
 const Modal = styled.div`
-  background: ${(props) => props.theme.colors.white};
+  background: ${(props) => props.theme.colors.cardBg || props.theme.colors.white};
   padding: ${(props) => props.theme.spacing.large};
   border-radius: 8px;
   min-width: 320px;
@@ -147,7 +148,7 @@ function sameYarn(a, b) {
   );
 }
 
-function SavedYarns({ params, setParams }) {
+function SavedYarns({ params, setParams, showToast }) {
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [loadModalOpen, setLoadModalOpen] = useState(false);
   const [saveBrand, setSaveBrand] = useState('');
@@ -186,6 +187,7 @@ function SavedYarns({ params, setParams }) {
       colorSequence: params?.colorSequence ?? [],
     });
     setSaveModalOpen(false);
+    showToast?.('Yarn saved');
   };
 
   const handleOpenLoad = () => {
@@ -205,12 +207,14 @@ function SavedYarns({ params, setParams }) {
           : (params?.colorSequence ?? []),
     });
     setLoadModalOpen(false);
+    showToast?.('Yarn loaded');
   };
 
   const handleDelete = (id) => {
     if (window.confirm('Remove this yarn from your saved list?')) {
       deleteYarn(id);
       refreshSaves();
+      showToast?.('Yarn removed');
     }
   };
 
@@ -242,6 +246,7 @@ function SavedYarns({ params, setParams }) {
                   value={saveBrand}
                   onChange={(e) => setSaveBrand(e.target.value)}
                   placeholder="e.g. Red Heart"
+                  maxLength={INPUT_LIMITS.yarnBrand}
                 />
               </Field>
               <Field>
@@ -252,6 +257,7 @@ function SavedYarns({ params, setParams }) {
                   value={saveName}
                   onChange={(e) => setSaveName(e.target.value)}
                   placeholder="e.g. Super Saver"
+                  maxLength={INPUT_LIMITS.yarnName}
                 />
               </Field>
               <Field>
@@ -262,6 +268,7 @@ function SavedYarns({ params, setParams }) {
                   value={saveColorway}
                   onChange={(e) => setSaveColorway(e.target.value)}
                   placeholder="e.g. Cherry Red"
+                  maxLength={INPUT_LIMITS.yarnColorway}
                 />
               </Field>
               <ModalActions>

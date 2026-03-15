@@ -37,7 +37,12 @@ function Instructions() {
   const [open, setOpen] = useState(false);
   return (
     <Wrapper>
-      <Toggle type="button" onClick={() => setOpen(!open)}>
+      <Toggle
+        type="button"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        aria-label="How to use (expand or collapse)"
+      >
         {open ? '▼' : '►'} How to use
       </Toggle>
       {open && (

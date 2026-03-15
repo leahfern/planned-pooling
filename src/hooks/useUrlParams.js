@@ -35,7 +35,8 @@ const useUrlParams = (defaultParams) => {
 
   const setUrlParams = useCallback(
     (newParams) => {
-      const newQueryParams = new URLSearchParams(queryParams);
+      setParams(newParams);
+      const newQueryParams = new URLSearchParams();
       Object.entries(newParams).forEach(([key, value]) => {
         if (typeof value === 'object') {
           newQueryParams.set(key, JSON.stringify(value));
@@ -45,7 +46,7 @@ const useUrlParams = (defaultParams) => {
       });
       navigate({ search: newQueryParams.toString() });
     },
-    [queryParams, navigate]
+    [navigate]
   );
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect'; // Extends jest matchers
+import '@testing-library/jest-dom/extend-expect';
 
 import App from './App';
 
@@ -8,16 +8,17 @@ describe('App', () => {
   test('renders App component', () => {
     render(<App />);
     expect(screen.getByText('Planned Pooling Helper')).toBeInTheDocument();
-    expect(screen.getByText('Number of stitches:')).toBeInTheDocument();
-    expect(screen.getByText('Color sequence')).toBeInTheDocument();
+    expect(screen.getByText('Columns')).toBeInTheDocument();
+    expect(screen.getByText('Rows')).toBeInTheDocument();
+    expect(screen.getByText('Color list')).toBeInTheDocument();
   });
 
   test('updates graph dimensions', () => {
     render(<App />);
-    const widthInput = screen.getByLabelText('Stitches per row');
-    const heightInput = screen.getByLabelText('Number of rows');
-    fireEvent.change(widthInput, { target: { value: 30 } });
-    fireEvent.change(heightInput, { target: { value: 25 } });
+    const widthInput = screen.getByLabelText('Columns');
+    const heightInput = screen.getByLabelText('Rows');
+    fireEvent.change(widthInput, { target: { value: '30' } });
+    fireEvent.change(heightInput, { target: { value: '25' } });
     expect(widthInput).toHaveValue(30);
     expect(heightInput).toHaveValue(25);
   });
