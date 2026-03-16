@@ -25,6 +25,10 @@ Output is in the `build` folder. Deploy that folder to any static host (Vercel, 
 npm test
 ```
 
+## TypeScript
+
+The project is set up for TypeScript. Core types live in `src/types.ts`. `theme`, `stitchPatterns`, and `usePreferredColorScheme` are already typed (`.ts`/`.tsx`). You can migrate the rest gradually by renaming files to `.ts`/`.tsx` and adding types; `allowJs: true` in `tsconfig.json` lets JS and TS coexist.
+
 ---
 
 Built with [Create React App](https://github.com/facebook/create-react-app).
