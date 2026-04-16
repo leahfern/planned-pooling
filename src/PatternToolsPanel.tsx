@@ -68,7 +68,7 @@ const BigLabel = styled.span`
   color: ${(p) => p.theme.colors.text};
 `;
 
-interface ProFeaturesProps {
+interface PatternToolsPanelProps {
   length: number;
   height: number;
   colorSequence: ColorSequenceItem[];
@@ -79,7 +79,7 @@ interface ProFeaturesProps {
   onReset: () => void;
 }
 
-export default function ProFeatures({
+export default function PatternToolsPanel({
   length,
   height,
   colorSequence,
@@ -88,7 +88,7 @@ export default function ProFeatures({
   onPrev,
   onNext,
   onReset,
-}: ProFeaturesProps) {
+}: PatternToolsPanelProps) {
   const patternDisplay = useMemo(() => {
     const rows = buildWrittenPattern(length, height, colorSequence, stitchPattern);
     const repeatBlockSize = getRepeatBlockSize(rows);
