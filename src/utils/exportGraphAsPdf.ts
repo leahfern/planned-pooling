@@ -2,8 +2,9 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import QRCode from 'qrcode';
 import type { AppParams, ExportPdfOptions } from '../types';
+import { getRepeatBlockSize } from './writtenPattern';
 
-const SITE_NAME = 'Planned Pooling Helper';
+const SITE_NAME = 'StitchMap';
 
 function formatStitchPattern(value: string): string {
   if (value === 'back-and-forth') return 'Back-and-forth (flat)';
@@ -222,6 +223,46 @@ export async function exportGraphAsPdf(options: ExportPdfOptions): Promise<void>
       });
     });
     y += 8;
+
+    const writtenRows = options.writtenPatternRows;
+    if (writtenRows && writtenRows.length > 0) {
+      const repeatBlockSize = getRepeatBlockSize(writtenRows);
+      const rowsForPdf = repeatBlockSize
+        ? writtenRows.slice(0, repeatBlockSize)
+        : writtenRows;
+
+      doc.setFontSize(10);
+      doc.setFont(undefined as unknown as string, 'bold');
+      y = ensureSpace(12);
+      doc.text('Written pattern (row by row)', margin, y);
+      y += 6;
+      doc.setFont(undefined as unknown as string, 'normal');
+      doc.setFontSize(8);
+      rowsForPdf.forEach((row) => {
+        const text = `Row ${row.rowNumber}: ${row.line}`;
+        const lines = doc.splitTextToSize(text, contentW);
+        const blockH = lines.length * 4 + 1;
+        y = ensureSpace(blockH);
+        lines.forEach((line: string) => {
+          doc.text(line, margin, y);
+          y += 4;
+        });
+      });
+
+      if (repeatBlockSize) {
+        y = ensureSpace(8);
+        doc.setFontSize(9);
+        doc.text(
+          `Repeat rows 1-${repeatBlockSize} until desired length is reached`,
+          margin,
+          y
+        );
+        y += 6;
+      }
+
+      doc.setFontSize(10);
+      y += 6;
+    }
 
     const qrSize = 25;
     const urlLines = doc.splitTextToSize(shareUrl ?? window.location.href, contentW);

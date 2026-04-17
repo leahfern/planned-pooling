@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import type { ColorSequenceItem } from '../types';
+import { buildRepeatedColorSequence, getRowHexes } from '../utils/poolingGrid';
 
 const BASE_CELL_PX = 12;
 
@@ -10,23 +11,6 @@ const CanvasWrapper = styled.div`
   line-height: 0;
 `;
 
-function buildRepeatedColorSequence(
-  colorSequence: ColorSequenceItem[],
-  length: number,
-  height: number
-): string[] {
-  const total = length * height;
-  const result: string[] = [];
-  while (result.length < total) {
-    for (const colorInfo of colorSequence) {
-      for (let c = 0; c < colorInfo.count; c++) {
-        result.push(colorInfo.hex || '#e0e0e0');
-      }
-    }
-  }
-  return result.slice(0, total);
-}
-
 interface GraphCanvasProps {
   length: number;
   height: number;
@@ -34,6 +18,8 @@ interface GraphCanvasProps {
   colorSequence: ColorSequenceItem[];
   stitchPattern: string;
   zoom?: number;
+  /** 0-based row index to highlight (e.g. row tracker). */
+  highlightedRowIndex?: number | null;
 }
 
 export default function GraphCanvas({
@@ -43,6 +29,7 @@ export default function GraphCanvas({
   colorSequence,
   stitchPattern,
   zoom = 1,
+  highlightedRowIndex = null,
 }: GraphCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -66,12 +53,7 @@ export default function GraphCanvas({
     canvas.height = canvasHeight;
 
     for (let row = 0; row < height; row++) {
-      const startIndex = row * length;
-      let rowColors = repeatedSequence.slice(startIndex, startIndex + length);
-
-      if (stitchPattern === 'back-and-forth' && row % 2 === 1) {
-        rowColors = [...rowColors].reverse();
-      }
+      const rowColors = getRowHexes(row, length, repeatedSequence, stitchPattern);
 
       for (let col = 0; col < length; col++) {
         const x = col * cellPx;
@@ -85,6 +67,14 @@ export default function GraphCanvas({
           ctx.strokeRect(x, y, cellPx, cellPx);
         }
       }
+
+      if (highlightedRowIndex !== null && highlightedRowIndex === row) {
+        ctx.fillStyle = 'rgba(255, 215, 0, 0.35)';
+        ctx.fillRect(0, row * cellPx, canvasWidth, cellPx);
+        ctx.strokeStyle = 'rgba(218, 165, 32, 0.95)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(1, row * cellPx + 1, canvasWidth - 2, cellPx - 2);
+      }
     }
   }, [
     length,
@@ -96,6 +86,7 @@ export default function GraphCanvas({
     canvasWidth,
     canvasHeight,
     repeatedSequence,
+    highlightedRowIndex,
   ]);
 
   return (

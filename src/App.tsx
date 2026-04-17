@@ -3,7 +3,7 @@ import { GlobalStyle } from './GlobalStyle';
 import { lightTheme, darkTheme } from './theme';
 import usePreferredColorScheme from './hooks/usePreferredColorScheme';
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { useLocation, Routes, Route, useSearchParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import GraphCanvas from './graph/GraphCanvas';
 import GraphWrapper from './graph/GraphWrapper';
@@ -21,12 +21,9 @@ import { exportGraphAsPdf } from './utils/exportGraphAsPdf';
 import { MIN_GRID_DIMENSION, MAX_GRID_DIMENSION } from './constants/grid';
 import { Toast } from './Toast';
 import type { AppParams } from './types';
-import PaymentSuccess from './PaymentSuccess';
 import PatternToolsPanel from './PatternToolsPanel';
-import { useProUnlock } from './hooks/useProUnlock';
 import { useRowTracker } from './hooks/useRowTracker';
 import { buildWrittenPattern } from './utils/writtenPattern';
-import { MONETIZATION_ENABLED } from './constants/pro';
 
 const SIDEBAR_TAB_WIDTH = 56;
 
@@ -145,9 +142,7 @@ function PoolingApp() {
   const colorScheme = usePreferredColorScheme();
   const theme = colorScheme === 'dark' ? darkTheme : lightTheme;
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
   const [params, setParams] = useUrlParams(defaultParams);
-  const { isPro } = useProUnlock();
 
   const {
     graphLength,
@@ -166,6 +161,7 @@ function PoolingApp() {
 
   const [currentProject, setCurrentProject] = useState<CurrentProject | null>(null);
   const [toast, setToast] = useState<ToastState | null>(null);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const graphRef = useRef<HTMLDivElement>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -177,18 +173,6 @@ function PoolingApp() {
       toastTimerRef.current = null;
     }, TOAST_DURATION_MS);
   }, []);
-
-  const paymentQueryFlag = searchParams.get('payment');
-  useEffect(() => {
-    if (!MONETIZATION_ENABLED) return;
-    if (paymentQueryFlag === 'unverified') {
-      showToast('Payment could not be verified.', 'error');
-      setSearchParams({}, { replace: true });
-    } else if (paymentQueryFlag === 'error') {
-      showToast('Something went wrong after checkout.', 'error');
-      setSearchParams({}, { replace: true });
-    }
-  }, [paymentQueryFlag, setSearchParams, showToast]);
 
   useEffect(() => {
     return () => {
@@ -207,7 +191,9 @@ function PoolingApp() {
   );
 
   const highlightedRowIndex =
-    isPro && safeHeight > 0 ? Math.min(safeHeight, Math.max(1, currentRow)) - 1 : null;
+    isExportingPdf || safeHeight <= 0
+      ? null
+      : Math.min(safeHeight, Math.max(1, currentRow)) - 1;
 
   const setGraphHeight = (value: string | number) =>
     setParams({ ...params, graphHeight: clampDimension(value, graphHeight) });
@@ -295,21 +281,28 @@ function PoolingApp() {
               </button>
               <button
                 type="button"
-                disabled={MONETIZATION_ENABLED && !isPro}
-                title={MONETIZATION_ENABLED && !isPro ? 'Unavailable right now' : undefined}
-                onClick={() => {
-                  if (MONETIZATION_ENABLED && !isPro) return;
-                  exportGraphAsPdf({
-                    graphNode: graphRef.current,
-                    filename: getExportFileName(currentProject?.name, 'pdf'),
-                    params,
-                    projectTitle: currentProject?.name,
-                    projectAuthor: currentProject?.author,
-                    shareUrl,
-                    writtenPatternRows,
-                    onSuccess: () => showToast('PDF exported'),
-                    onError: () => showToast('Failed to export PDF', 'error'),
-                  });
+                disabled={isExportingPdf}
+                onClick={async () => {
+                  setIsExportingPdf(true);
+                  try {
+                    await new Promise<void>((resolve) => {
+                      // Let React commit one frame so the graph redraws without row highlight.
+                      requestAnimationFrame(() => resolve());
+                    });
+                    await exportGraphAsPdf({
+                      graphNode: graphRef.current,
+                      filename: getExportFileName(currentProject?.name, 'pdf'),
+                      params,
+                      projectTitle: currentProject?.name,
+                      projectAuthor: currentProject?.author,
+                      shareUrl,
+                      writtenPatternRows,
+                      onSuccess: () => showToast('PDF exported'),
+                      onError: () => showToast('Failed to export PDF', 'error'),
+                    });
+                  } finally {
+                    setIsExportingPdf(false);
+                  }
                 }}
               >
                 Export PDF
@@ -350,10 +343,5 @@ function PoolingApp() {
 }
 
 export default function App() {
-  return (
-    <Routes>
-      {MONETIZATION_ENABLED && <Route path="/success" element={<PaymentSuccess />} />}
-      <Route path="*" element={<PoolingApp />} />
-    </Routes>
-  );
+  return <PoolingApp />;
 }

@@ -153,7 +153,7 @@ const Dimensions: React.FC<DimensionsProps> = ({
 
   return (
     <DimensionsContainer>
-      <Title>Planned Pooling Helper</Title>
+      <Title>StitchMap — Planned Pooling Helper</Title>
       <InputPanel>
         <InputContainer>
           <Label as="label" htmlFor="columns">Columns</Label>

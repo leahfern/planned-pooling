@@ -59,6 +59,12 @@ export interface ExportImageOptions {
   onSuccess?: () => void;
 }
 
+/** One line of the human-readable row-by-row pattern. */
+export interface WrittenPatternRow {
+  rowNumber: number;
+  line: string;
+}
+
 export interface ExportPdfOptions {
   graphNode: HTMLElement | null;
   filename?: string;
@@ -66,6 +72,8 @@ export interface ExportPdfOptions {
   projectTitle?: string;
   projectAuthor?: string;
   shareUrl?: string;
+  /** Optional row-by-row text (e.g. "3 Teal, 7 Terracotta") appended to the PDF. */
+  writtenPatternRows?: WrittenPatternRow[];
   onError?: () => void;
   onSuccess?: () => void;
 }
