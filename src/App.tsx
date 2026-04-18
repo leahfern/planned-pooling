@@ -105,6 +105,7 @@ const defaultParams: AppParams = {
   graphLength: 41,
   graphHeight: 41,
   showGridlines: true,
+  highlightCurrentRowOnGrid: false,
   stitchPattern: BACK_AND_FORTH,
   colorSequence: [
     { sequence: 1, hex: '#008080', count: 3, textColor: 'white', name: 'Teal' },
@@ -148,6 +149,7 @@ function PoolingApp() {
     graphLength,
     graphHeight,
     showGridlines,
+    highlightCurrentRowOnGrid,
     stitchPattern,
     colorSequence,
     showSidePanel,
@@ -191,7 +193,9 @@ function PoolingApp() {
   );
 
   const highlightedRowIndex =
-    isExportingPdf || safeHeight <= 0
+    isExportingPdf ||
+    !highlightCurrentRowOnGrid ||
+    safeHeight <= 0
       ? null
       : Math.min(safeHeight, Math.max(1, currentRow)) - 1;
 
@@ -201,6 +205,8 @@ function PoolingApp() {
     setParams({ ...params, graphLength: clampDimension(value, graphLength) });
   const setShowGridlines = (value: boolean) =>
     setParams({ ...params, showGridlines: value });
+  const setHighlightCurrentRowOnGrid = (value: boolean) =>
+    setParams({ ...params, highlightCurrentRowOnGrid: value });
   const setStitchPattern = (value: string) =>
     setParams({ ...params, stitchPattern: value });
   const setShowSidePanel = (value: boolean) =>
@@ -325,6 +331,8 @@ function PoolingApp() {
               onPrev={prev}
               onNext={next}
               onReset={reset}
+              highlightCurrentRowOnGrid={highlightCurrentRowOnGrid}
+              onHighlightCurrentRowOnGridChange={setHighlightCurrentRowOnGrid}
             />
           </MainContent>
         </ContentRow>

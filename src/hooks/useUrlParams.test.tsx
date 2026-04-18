@@ -10,6 +10,7 @@ const defaultParams: AppParams = {
   graphLength: 41,
   graphHeight: 41,
   showGridlines: true,
+  highlightCurrentRowOnGrid: false,
   stitchPattern: BACK_AND_FORTH,
   colorSequence: [],
   showSidePanel: true,

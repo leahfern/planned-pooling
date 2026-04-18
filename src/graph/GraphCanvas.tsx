@@ -67,14 +67,21 @@ export default function GraphCanvas({
           ctx.strokeRect(x, y, cellPx, cellPx);
         }
       }
+    }
 
-      if (highlightedRowIndex !== null && highlightedRowIndex === row) {
-        ctx.fillStyle = 'rgba(255, 215, 0, 0.35)';
-        ctx.fillRect(0, row * cellPx, canvasWidth, cellPx);
-        ctx.strokeStyle = 'rgba(218, 165, 32, 0.95)';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(1, row * cellPx + 1, canvasWidth - 2, cellPx - 2);
-      }
+    if (
+      highlightedRowIndex !== null &&
+      highlightedRowIndex >= 0 &&
+      highlightedRowIndex < height
+    ) {
+      const y = highlightedRowIndex * cellPx;
+      const bandH = Math.max(2, Math.min(5, Math.round(cellPx * 0.22)));
+      const barW = Math.max(4, Math.min(10, Math.round(cellPx * 0.34)));
+      ctx.fillStyle = '#0f766e';
+      ctx.fillRect(0, y, barW, cellPx);
+      ctx.fillStyle = '#042f2e';
+      ctx.fillRect(0, y, canvasWidth, bandH);
+      ctx.fillRect(0, y + cellPx - bandH, canvasWidth, bandH);
     }
   }, [
     length,

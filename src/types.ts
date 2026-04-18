@@ -14,6 +14,8 @@ export interface AppParams {
   graphLength: number;
   graphHeight: number;
   showGridlines: boolean;
+  /** When true, the row tracker highlights the active row on the grid canvas. */
+  highlightCurrentRowOnGrid: boolean;
   stitchPattern: string;
   colorSequence: ColorSequenceItem[];
   showSidePanel: boolean;

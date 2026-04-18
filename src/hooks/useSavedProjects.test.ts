@@ -14,6 +14,7 @@ function getMinimalParams(): AppParams {
     graphLength: 10,
     graphHeight: 10,
     showGridlines: true,
+    highlightCurrentRowOnGrid: false,
     stitchPattern: 'back-and-forth',
     colorSequence: [],
     showSidePanel: true,

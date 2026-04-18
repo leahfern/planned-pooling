@@ -63,6 +63,17 @@ const TrackerRow = styled.div`
   margin-top: 16px;
 `;
 
+const HighlightToggle = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: ${(p) => p.theme.colors.text};
+  cursor: pointer;
+  user-select: none;
+`;
+
 const BigLabel = styled.span`
   font-weight: 600;
   color: ${(p) => p.theme.colors.text};
@@ -77,6 +88,8 @@ interface PatternToolsPanelProps {
   onPrev: () => void;
   onNext: () => void;
   onReset: () => void;
+  highlightCurrentRowOnGrid: boolean;
+  onHighlightCurrentRowOnGridChange: (value: boolean) => void;
 }
 
 export default function PatternToolsPanel({
@@ -88,6 +101,8 @@ export default function PatternToolsPanel({
   onPrev,
   onNext,
   onReset,
+  highlightCurrentRowOnGrid,
+  onHighlightCurrentRowOnGridChange,
 }: PatternToolsPanelProps) {
   const patternDisplay = useMemo(() => {
     const rows = buildWrittenPattern(length, height, colorSequence, stitchPattern);
@@ -131,7 +146,17 @@ export default function PatternToolsPanel({
       {rowTrackerHint && <RepeatNote>{rowTrackerHint}</RepeatNote>}
 
       <Title style={{ marginTop: 20 }}>Row tracker</Title>
-      <Muted>Tap +/− while you work. The grid highlights the row you&apos;re on.</Muted>
+      <Muted>
+        Tap +/− while you work. Optional: show your current row on the grid with a teal bar and dark bands so it&apos;s easy to match the written pattern while you stitch.
+      </Muted>
+      <HighlightToggle>
+        <input
+          type="checkbox"
+          checked={highlightCurrentRowOnGrid}
+          onChange={(e) => onHighlightCurrentRowOnGridChange(e.target.checked)}
+        />
+        Highlight current row on grid
+      </HighlightToggle>
       <TrackerRow>
         <BigLabel>
           Row {currentRow} / {height}

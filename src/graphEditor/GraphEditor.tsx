@@ -79,7 +79,7 @@ const GraphEditor: React.FC<GraphEditorProps> = ({
   params,
   maxDimension = 500,
 }) => {
-  const handleShowHideGridlines = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleShowHideGridlines = () => {
     setShowGridlines(!showGridlines);
   };
 
