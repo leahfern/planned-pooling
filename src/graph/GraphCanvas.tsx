@@ -96,7 +96,7 @@ export default function GraphCanvas({
         width={canvasWidth}
         height={canvasHeight}
         style={{ display: 'block', width: canvasWidth, height: canvasHeight }}
-        aria-label="Planned pooling grid preview"
+        aria-label="Pattern grid preview"
       />
     </CanvasWrapper>
   );

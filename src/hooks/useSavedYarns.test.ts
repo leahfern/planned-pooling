@@ -1,11 +1,13 @@
 import { getSavedYarns, saveYarn, deleteYarn } from './useSavedYarns';
 import type { ColorSequenceItem } from '../types';
 
-const STORAGE_KEY = 'planned-pooling-yarns';
+const STORAGE_KEY = 'skeinsmith-yarns';
+const LEGACY_STORAGE_KEY = 'planned-pooling-yarns';
 
 describe('useSavedYarns', () => {
   beforeEach(() => {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
   });
 
   describe('getSavedYarns', () => {
@@ -77,6 +79,25 @@ describe('useSavedYarns', () => {
       expect(getSavedYarns()).toHaveLength(1);
       deleteYarn(saved.id);
       expect(getSavedYarns()).toHaveLength(0);
+    });
+  });
+
+  describe('legacy key migration', () => {
+    it('reads yarns from the legacy planned-pooling-yarns key when the new key is empty', () => {
+      const yarns = [
+        {
+          id: 'legacy-1',
+          brand: 'Old',
+          name: 'Brand',
+          colorway: 'Blue',
+          colorSequence: [],
+          savedAt: new Date().toISOString(),
+        },
+      ];
+      localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(yarns));
+      expect(getSavedYarns()).toHaveLength(1);
+      expect(getSavedYarns()[0].brand).toBe('Old');
+      expect(localStorage.getItem(STORAGE_KEY)).not.toBeNull();
     });
   });
 });

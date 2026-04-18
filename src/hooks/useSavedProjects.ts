@@ -1,8 +1,23 @@
 import type { AppParams, SavedProject } from '../types';
 
-const STORAGE_KEY = 'planned-pooling-saves';
+const STORAGE_KEY = 'skeinsmith-saves';
+const LEGACY_STORAGE_KEY = 'planned-pooling-saves';
+
+// One-time migration: copy any saves from the pre-rebrand key to the
+// current key if the current key hasn't been written yet. Leaves the legacy
+// key in place so downgrading wouldn't lose data.
+function migrateLegacyKey(): void {
+  try {
+    if (localStorage.getItem(STORAGE_KEY) !== null) return;
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacy) localStorage.setItem(STORAGE_KEY, legacy);
+  } catch {
+    /* ignore */
+  }
+}
 
 export function getSaves(): SavedProject[] {
+  migrateLegacyKey();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
@@ -68,7 +83,7 @@ export function getExportFileName(
 ): string {
   const base = projectTitle?.trim()
     ? projectTitle.replace(/[^\w\s-]/g, '').replace(/\s+/g, ' ').trim() ||
-      'planned-pooling-pattern'
-    : 'planned-pooling-pattern';
+      'skeinsmith-pattern'
+    : 'skeinsmith-pattern';
   return `${base}.${extension}`;
 }

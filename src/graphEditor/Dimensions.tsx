@@ -153,7 +153,7 @@ const Dimensions: React.FC<DimensionsProps> = ({
 
   return (
     <DimensionsContainer>
-      <Title>StitchMap — Planned Pooling Helper</Title>
+      <Title>Skeinsmith</Title>
       <InputPanel>
         <InputContainer>
           <Label as="label" htmlFor="columns">Columns</Label>

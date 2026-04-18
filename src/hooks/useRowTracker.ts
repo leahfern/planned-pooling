@@ -1,10 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 
-const ROW_KEY = 'stitchmap-current-row';
+const ROW_KEY = 'skeinsmith-current-row';
+const LEGACY_ROW_KEY = 'stitchmap-current-row';
 
 function readStoredRow(): number {
   try {
-    const raw = window.localStorage.getItem(ROW_KEY);
+    let raw = window.localStorage.getItem(ROW_KEY);
+    if (raw === null) {
+      const legacy = window.localStorage.getItem(LEGACY_ROW_KEY);
+      if (legacy !== null) {
+        window.localStorage.setItem(ROW_KEY, legacy);
+        raw = legacy;
+      }
+    }
     if (!raw) return 1;
     const n = parseInt(raw, 10);
     return Number.isFinite(n) && n >= 1 ? n : 1;

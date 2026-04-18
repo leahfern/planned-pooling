@@ -1,8 +1,22 @@
 import type { ColorSequenceItem, SavedYarn } from '../types';
 
-const STORAGE_KEY = 'planned-pooling-yarns';
+const STORAGE_KEY = 'skeinsmith-yarns';
+const LEGACY_STORAGE_KEY = 'planned-pooling-yarns';
+
+// One-time migration: copy any yarns from the pre-rebrand key to the
+// current key if the current key hasn't been written yet.
+function migrateLegacyKey(): void {
+  try {
+    if (localStorage.getItem(STORAGE_KEY) !== null) return;
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacy) localStorage.setItem(STORAGE_KEY, legacy);
+  } catch {
+    /* ignore */
+  }
+}
 
 export function getSavedYarns(): SavedYarn[] {
+  migrateLegacyKey();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];

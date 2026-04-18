@@ -4,7 +4,7 @@ import QRCode from 'qrcode';
 import type { AppParams, ExportPdfOptions } from '../types';
 import { getRepeatBlockSize } from './writtenPattern';
 
-const SITE_NAME = 'StitchMap';
+const SITE_NAME = 'Skeinsmith';
 
 function formatStitchPattern(value: string): string {
   if (value === 'back-and-forth') return 'Back-and-forth (flat)';
@@ -37,7 +37,7 @@ function formatStitchType(params: AppParams): string | null {
 export async function exportGraphAsPdf(options: ExportPdfOptions): Promise<void> {
   const {
     graphNode,
-    filename = 'planned-pooling-pattern.pdf',
+    filename = 'skeinsmith-pattern.pdf',
     params,
     projectTitle,
     projectAuthor,

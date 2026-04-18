@@ -1,6 +1,6 @@
-# Planned Pooling Helper
+# Skeinsmith
 
-Plan your crochet or knit color pooling pattern: set stitch counts per color, preview the grid, and export to image or PDF. Share a link to your pattern or save projects and yarns in the browser.
+Skeinsmith is a planning tool for fiber artists. Start with color pooling: set stitch counts per color, preview the grid, and export to image or PDF. Share a link to your pattern or save projects and yarns in the browser. More tools for fiber artists are on the roadmap.
 
 This is an **actively maintained product**, not a throwaway demo. The source may stay available for transparency and learning; **how it’s hosted, licensed, or offered commercially can evolve**—details like pricing or paid tiers aren’t documented here yet.
 
@@ -12,8 +12,8 @@ This is an **actively maintained product**, not a throwaway demo. The source may
 ## Quick start
 
 ```bash
-git clone https://github.com/<your-fork-or-upstream>/planned-pooling.git
-cd planned-pooling
+git clone https://github.com/<your-fork-or-upstream>/skeinsmith.git
+cd skeinsmith
 npm install
 npm start
 ```

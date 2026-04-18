@@ -6,7 +6,8 @@ import {
 } from './useSavedProjects';
 import type { AppParams } from '../types';
 
-const STORAGE_KEY = 'planned-pooling-saves';
+const STORAGE_KEY = 'skeinsmith-saves';
+const LEGACY_STORAGE_KEY = 'planned-pooling-saves';
 
 function getMinimalParams(): AppParams {
   return {
@@ -32,6 +33,7 @@ function getMinimalParams(): AppParams {
 describe('useSavedProjects', () => {
   beforeEach(() => {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
   });
 
   describe('getSaves', () => {
@@ -125,11 +127,54 @@ describe('useSavedProjects', () => {
     });
 
     it('uses default base when projectTitle is undefined', () => {
-      expect(getExportFileName(undefined, 'png')).toBe('planned-pooling-pattern.png');
+      expect(getExportFileName(undefined, 'png')).toBe('skeinsmith-pattern.png');
     });
 
     it('uses default base when projectTitle is empty after trim', () => {
-      expect(getExportFileName('   ', 'pdf')).toBe('planned-pooling-pattern.pdf');
+      expect(getExportFileName('   ', 'pdf')).toBe('skeinsmith-pattern.pdf');
+    });
+  });
+
+  describe('legacy key migration', () => {
+    it('reads saves from the legacy planned-pooling-saves key when the new key is empty', () => {
+      const saves = [
+        {
+          id: 'legacy-1',
+          name: 'From Old Key',
+          author: 'Me',
+          savedAt: new Date().toISOString(),
+          params: getMinimalParams(),
+        },
+      ];
+      localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(saves));
+      expect(getSaves()).toHaveLength(1);
+      expect(getSaves()[0].name).toBe('From Old Key');
+      // Migration copies the data onto the new key
+      expect(localStorage.getItem(STORAGE_KEY)).not.toBeNull();
+    });
+
+    it('does not overwrite the new key when it already has data', () => {
+      const newSaves = [
+        {
+          id: 'new-1',
+          name: 'New',
+          author: '',
+          savedAt: new Date().toISOString(),
+          params: getMinimalParams(),
+        },
+      ];
+      const legacySaves = [
+        {
+          id: 'legacy-1',
+          name: 'Legacy',
+          author: '',
+          savedAt: new Date().toISOString(),
+          params: getMinimalParams(),
+        },
+      ];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newSaves));
+      localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(legacySaves));
+      expect(getSaves()[0].name).toBe('New');
     });
   });
 });

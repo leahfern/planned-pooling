@@ -3,7 +3,7 @@ import type { ExportImageOptions } from '../types';
 
 export async function exportGraphAsImage(
   node: HTMLElement | null,
-  filename = 'planned-pooling-pattern.png',
+  filename = 'skeinsmith-pattern.png',
   options: ExportImageOptions = {}
 ): Promise<void> {
   const { onError, onSuccess } = options;

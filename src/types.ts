@@ -1,5 +1,5 @@
 /**
- * Shared TypeScript types for the Planned Pooling app.
+ * Shared TypeScript types for the Skeinsmith app.
  */
 
 export interface ColorSequenceItem {
