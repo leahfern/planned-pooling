@@ -102,7 +102,7 @@ const MainContent = styled.div`
 `;
 
 const defaultParams: AppParams = {
-  graphLength: 20,
+  graphLength: 41,
   graphHeight: 20,
   showGridlines: true,
   highlightCurrentRowOnGrid: false,

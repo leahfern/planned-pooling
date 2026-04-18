@@ -7,7 +7,7 @@ import { BACK_AND_FORTH } from '../modules/stitchPatterns';
 
 // Stable reference so useEffect in useUrlParams doesn't loop
 const defaultParams: AppParams = {
-  graphLength: 20,
+  graphLength: 41,
   graphHeight: 20,
   showGridlines: true,
   highlightCurrentRowOnGrid: false,
@@ -40,7 +40,7 @@ describe('useUrlParams', () => {
       wrapper,
     });
     const [params] = result.current;
-    expect(params.graphLength).toBe(20);
+    expect(params.graphLength).toBe(41);
     expect(params.graphHeight).toBe(20);
     expect(params.showGridlines).toBe(true);
   });
