@@ -102,8 +102,8 @@ const MainContent = styled.div`
 `;
 
 const defaultParams: AppParams = {
-  graphLength: 41,
-  graphHeight: 41,
+  graphLength: 20,
+  graphHeight: 20,
   showGridlines: true,
   highlightCurrentRowOnGrid: false,
   stitchPattern: BACK_AND_FORTH,
@@ -114,7 +114,7 @@ const defaultParams: AppParams = {
     { sequence: 4, hex: '#F5F5DC', count: 1, textColor: 'black', name: 'Cream' },
   ],
   showSidePanel: true,
-  zoom: 1,
+  zoom: 1.35,
   hookNeedleSize: '',
   hookNeedleSizeOther: '',
   stitchType: '',
