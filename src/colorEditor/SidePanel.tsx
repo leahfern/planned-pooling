@@ -49,8 +49,27 @@ const SidePanelContent = styled.div<{ $open: boolean }>`
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
+  overflow: hidden;
   margin-top: ${(props) => props.theme.spacing.small};
+`;
+
+/** Only the color list scrolls; keeps “Add a color” pinned above the drawer bottom. */
+const ColorListScroll = styled.div`
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+`;
+
+const SidePanelFooter = styled.div`
+  flex-shrink: 0;
+  padding-top: ${(props) => props.theme.spacing.medium};
+  border-top: 1px solid ${(props) => props.theme.colors.grey};
+`;
+
+const SavedYarnsBlock = styled.div`
+  flex-shrink: 0;
 `;
 
 const Title = styled.h2`
@@ -59,6 +78,7 @@ const Title = styled.h2`
   font-family: ${(props) => props.theme.fonts.secondary};
   font-size: ${(props) => props.theme.fontSizes.large};
   margin: 0 0 ${(props) => props.theme.spacing.small} 0;
+  flex-shrink: 0;
 `;
 
 interface SidePanelProps {
@@ -106,17 +126,23 @@ const SidePanel: React.FC<SidePanelProps> = ({
         </ButtonContainer>
         <SidePanelContent $open={showSidePanel} data-testid="sidePanelContent">
           <Title>Color list</Title>
-          <SavedYarns params={params} setParams={setParams} showToast={showToast} />
-          <ColorList
-            colorSequence={colorSequence}
-            setColorSequence={setColorSequence}
-            showToast={showToast}
-          />
-          <AddColor
-            colorSequence={colorSequence}
-            setColorSequence={setColorSequence}
-            showToast={showToast}
-          />
+          <SavedYarnsBlock>
+            <SavedYarns params={params} setParams={setParams} showToast={showToast} />
+          </SavedYarnsBlock>
+          <ColorListScroll>
+            <ColorList
+              colorSequence={colorSequence}
+              setColorSequence={setColorSequence}
+              showToast={showToast}
+            />
+          </ColorListScroll>
+          <SidePanelFooter>
+            <AddColor
+              colorSequence={colorSequence}
+              setColorSequence={setColorSequence}
+              showToast={showToast}
+            />
+          </SidePanelFooter>
         </SidePanelContent>
       </SidePanelContainer>
     </>
