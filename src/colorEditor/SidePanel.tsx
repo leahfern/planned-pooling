@@ -20,7 +20,7 @@ const Backdrop = styled.div`
   }
 `;
 
-const SidePanelContainer = styled.div<{ $open: boolean }>`
+const Drawer = styled.div<{ $open: boolean }>`
   position: fixed;
   top: 0;
   right: 0;
@@ -39,12 +39,23 @@ const SidePanelContainer = styled.div<{ $open: boolean }>`
   overflow: visible;
 `;
 
-const ButtonContainer = styled.div`
+const ToggleRow = styled.div`
   display: flex;
   flex-shrink: 0;
 `;
 
-const SidePanelContent = styled.div<{ $open: boolean }>`
+/**
+ * Vertical stack inside the drawer: fixed header sections at the top, a
+ * content-sized (but scrollable when tall) color list in the middle, and a
+ * fixed "Add a color" footer sitting directly below the list.
+ *
+ * Key behavior:
+ * - Short list: the list takes its natural height and the Add button sits
+ *   immediately under it; empty space falls below the button.
+ * - Long list: the list shrinks to fit remaining space and scrolls internally,
+ *   so the Add button stays pinned above the drawer bottom.
+ */
+const DrawerBody = styled.div<{ $open: boolean }>`
   display: ${(props) => (props.$open ? 'flex' : 'none')};
   flex-direction: column;
   flex: 1;
@@ -53,22 +64,7 @@ const SidePanelContent = styled.div<{ $open: boolean }>`
   margin-top: ${(props) => props.theme.spacing.small};
 `;
 
-/** Only the color list scrolls; keeps “Add a color” pinned above the drawer bottom. */
-const ColorListScroll = styled.div`
-  flex: 1 1 0;
-  min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-`;
-
-const SidePanelFooter = styled.div`
-  flex-shrink: 0;
-  padding-top: ${(props) => props.theme.spacing.medium};
-  border-top: 1px solid ${(props) => props.theme.colors.grey};
-`;
-
-const SavedYarnsBlock = styled.div`
+const Header = styled.div`
   flex-shrink: 0;
 `;
 
@@ -78,7 +74,30 @@ const Title = styled.h2`
   font-family: ${(props) => props.theme.fonts.secondary};
   font-size: ${(props) => props.theme.fontSizes.large};
   margin: 0 0 ${(props) => props.theme.spacing.small} 0;
+`;
+
+/**
+ * Content-sized by default, shrinks and scrolls only when the children would
+ * overflow the space left over by the fixed header and footer.
+ *
+ * - flex-grow: 0  -> do not expand to fill remaining space (keeps the footer
+ *   glued to the bottom of the list when short)
+ * - flex-shrink: 1 -> can give up space when the list is tall
+ * - flex-basis: auto -> start at the content's natural height
+ * - min-height: 0 -> allow shrinking below intrinsic content size for scroll
+ */
+const ColorListScroll = styled.div`
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+`;
+
+const Footer = styled.div`
   flex-shrink: 0;
+  padding-top: ${(props) => props.theme.spacing.medium};
+  border-top: 1px solid ${(props) => props.theme.colors.grey};
 `;
 
 interface SidePanelProps {
@@ -110,8 +129,8 @@ const SidePanel: React.FC<SidePanelProps> = ({
           aria-hidden="true"
         />
       )}
-      <SidePanelContainer $open={showSidePanel}>
-        <ButtonContainer>
+      <Drawer $open={showSidePanel}>
+        <ToggleRow>
           <button
             type="button"
             onClick={() => setShowSidePanel(!showSidePanel)}
@@ -123,12 +142,18 @@ const SidePanel: React.FC<SidePanelProps> = ({
           >
             {openCloseIcon}
           </button>
-        </ButtonContainer>
-        <SidePanelContent $open={showSidePanel} data-testid="sidePanelContent">
-          <Title>Color list</Title>
-          <SavedYarnsBlock>
-            <SavedYarns params={params} setParams={setParams} showToast={showToast} />
-          </SavedYarnsBlock>
+        </ToggleRow>
+
+        <DrawerBody $open={showSidePanel} data-testid="sidePanelContent">
+          <Header>
+            <Title>Color list</Title>
+            <SavedYarns
+              params={params}
+              setParams={setParams}
+              showToast={showToast}
+            />
+          </Header>
+
           <ColorListScroll>
             <ColorList
               colorSequence={colorSequence}
@@ -136,15 +161,16 @@ const SidePanel: React.FC<SidePanelProps> = ({
               showToast={showToast}
             />
           </ColorListScroll>
-          <SidePanelFooter>
+
+          <Footer>
             <AddColor
               colorSequence={colorSequence}
               setColorSequence={setColorSequence}
               showToast={showToast}
             />
-          </SidePanelFooter>
-        </SidePanelContent>
-      </SidePanelContainer>
+          </Footer>
+        </DrawerBody>
+      </Drawer>
     </>
   );
 };
