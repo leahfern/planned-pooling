@@ -112,14 +112,12 @@ const SidePanel: React.FC<SidePanelProps> = ({
             setColorSequence={setColorSequence}
             showToast={showToast}
           />
-        </SidePanelContent>
-        {showSidePanel && (
           <AddColor
             colorSequence={colorSequence}
             setColorSequence={setColorSequence}
             showToast={showToast}
           />
-        )}
+        </SidePanelContent>
       </SidePanelContainer>
     </>
   );

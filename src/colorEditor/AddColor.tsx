@@ -5,7 +5,8 @@ import getColorDetails from '../api/colorDetails';
 import type { ColorSequenceItem } from '../types';
 
 const AddColorContainer = styled.div`
-  margin-top: ${(props) => props.theme.spacing.large};
+  margin-top: ${(props) => props.theme.spacing.medium};
+  flex-shrink: 0;
   display: flex;
   justify-content: center;
 `;
