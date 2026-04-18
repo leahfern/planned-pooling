@@ -33,9 +33,25 @@ export default function GraphCanvas({
 }: GraphCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const cellPx = BASE_CELL_PX * zoom;
-  const canvasWidth = length * cellPx;
-  const canvasHeight = height * cellPx;
+  // Integer cell size avoids sub-pixel gaps between fillRects at fractional zooms.
+  const cellPx = Math.max(1, Math.round(BASE_CELL_PX * zoom));
+  const gridPixelWidth = length * cellPx;
+  const gridPixelHeight = height * cellPx;
+
+  const resolvedHighlightRow =
+    highlightedRowIndex !== null &&
+    highlightedRowIndex >= 0 &&
+    highlightedRowIndex < height
+      ? highlightedRowIndex
+      : null;
+
+  const highlightBarW =
+    resolvedHighlightRow !== null
+      ? Math.max(4, Math.min(10, Math.round(cellPx * 0.34)))
+      : 0;
+  const leftGutter = resolvedHighlightRow !== null ? highlightBarW : 0;
+  const canvasWidth = leftGutter + gridPixelWidth;
+  const canvasHeight = gridPixelHeight;
 
   const repeatedSequence = useMemo(
     () => buildRepeatedColorSequence(colorSequence, length, height),
@@ -56,7 +72,7 @@ export default function GraphCanvas({
       const rowColors = getRowHexes(row, length, repeatedSequence, stitchPattern);
 
       for (let col = 0; col < length; col++) {
-        const x = col * cellPx;
+        const x = leftGutter + col * cellPx;
         const y = row * cellPx;
         ctx.fillStyle = rowColors[col] || '#e0e0e0';
         ctx.fillRect(x, y, cellPx, cellPx);
@@ -69,16 +85,11 @@ export default function GraphCanvas({
       }
     }
 
-    if (
-      highlightedRowIndex !== null &&
-      highlightedRowIndex >= 0 &&
-      highlightedRowIndex < height
-    ) {
-      const y = highlightedRowIndex * cellPx;
+    if (resolvedHighlightRow !== null) {
+      const y = resolvedHighlightRow * cellPx;
       const bandH = Math.max(2, Math.min(5, Math.round(cellPx * 0.22)));
-      const barW = Math.max(4, Math.min(10, Math.round(cellPx * 0.34)));
       ctx.fillStyle = '#0f766e';
-      ctx.fillRect(0, y, barW, cellPx);
+      ctx.fillRect(0, y, highlightBarW, cellPx);
       ctx.fillStyle = '#042f2e';
       ctx.fillRect(0, y, canvasWidth, bandH);
       ctx.fillRect(0, y + cellPx - bandH, canvasWidth, bandH);
@@ -90,10 +101,12 @@ export default function GraphCanvas({
     stitchPattern,
     zoom,
     cellPx,
+    leftGutter,
     canvasWidth,
     canvasHeight,
     repeatedSequence,
-    highlightedRowIndex,
+    resolvedHighlightRow,
+    highlightBarW,
   ]);
 
   return (
